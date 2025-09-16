@@ -1,0 +1,68 @@
+@startuml unsubscribe_sequence_diagram
+actor Usuario
+
+participant "NewsletterController" as Controller
+participant "NewsletterService" as Service
+participant "TokenService" as TokenService
+participant "EmailService" as EmailService
+participant "SubscriberRepository" as Repo
+participant "VerificationTokenRepository" as TokenRepo
+participant "Unsubscribe landing page" as FrontendService
+
+EmailService -> Controller : Get generateUnsubscribeLink()
+activate EmailService
+activate Controller
+Controller -> TokenService : generates the token
+activate TokenService
+TokenService -> TokenRepo : save the token
+TokenService -> Controller : return generated Token
+deactivate TokenService
+Controller -> EmailService : return generatedUnsubscribeLink()
+deactivate Controller
+EmailService -> Usuario : Sends newsletters emails with personal unsubscribe link 
+deactivate EmailService
+
+activate Usuario
+Usuario -> Controller : GET with personal token unsubscribe link
+deactivate Usuario
+
+activate Controller
+Controller -> FrontendService : re-directs to unsubscribe landing page
+deactivate Controller
+
+activate FrontendService
+FrontendService -> Usuario : returns landing page with unsubscribe button and poll
+deactivate FrontendService
+
+activate Usuario
+Usuario -> Controller : User fill in the poll and clic the unsubscribe button
+activate Controller 
+Controller -> Service : Checks if the confirm endpoint token is the same as the personal unsubscribe link
+activate Service
+Service -> TokenRepo : getToken()
+activate TokenRepo
+TokenRepo -> Service : return token
+deactivate TokenRepo
+
+alt Token is correct
+  Service -> Repo : change subscribe status to: UNSUBSCRIBE
+  activate Repo
+  Repo -> Service : return status
+  deactivate Repo
+  Service -> Controller : return status ok
+  Controller -> FrontendService : return status ok
+  activate FrontendService
+  FrontendService -> Usuario : return UNSUBSCRIBED message
+  deactivate FrontendService
+else Token not correct
+  Service -> Controller : return forbidden
+  Controller -> FrontendService : return forbidden
+  activate FrontendService
+  FrontendService -> Usuario : return "Error"
+  deactivate FrontendService
+end
+
+deactivate Service
+deactivate Controller
+
+@enduml

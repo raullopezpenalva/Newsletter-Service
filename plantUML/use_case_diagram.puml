@@ -1,0 +1,34 @@
+@startuml use_case_diagram
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario Anónimo" as Anonymous
+actor "Usuario Registrado" as Registered
+control "Sistema de Envío de Emails" as EmailSystem
+actor "Administrador" as Admin
+
+package "Newsletter Service" {
+    usecase "Suscribirse al newsletter" as UC_Subscribe
+    usecase "Confirmar suscripción" as UC_Verify
+    usecase "Ver formulario de baja" as UC_UnsubPage
+    usecase "Confirmar baja con motivo" as UC_UnsubConfirm
+    usecase "Obtener link personalizado de baja" as UC_GenUnsubLink
+    usecase "Ver lista de suscriptores" as UC_ListSubscribers
+    usecase "Ver métricas de suscriptores" as UC_Stats
+}
+
+' Relaciones
+Anonymous --> UC_Subscribe
+Anonymous --> UC_Verify
+Anonymous --> UC_UnsubPage
+Anonymous --> UC_UnsubConfirm
+
+Registered --> UC_Subscribe : via userCreated=true
+Registered --> UC_UnsubPage
+
+EmailSystem --> UC_GenUnsubLink
+
+Admin --> UC_ListSubscribers
+Admin --> UC_Stats
+
+@enduml

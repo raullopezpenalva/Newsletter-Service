@@ -1,0 +1,34 @@
+@startuml deployment_diagram_newsletter_service
+
+title Diagrama de Despliegue - Newsletter Service
+
+node "Docker Host / VPS / Cloud Node" {
+  
+  node "Docker Container: newsletter-service" {
+    component "Spring Boot App\n(newsletter-service.jar)"
+    component "OpenAPI / Swagger UI"
+  }
+
+  node "Docker Container: PostgreSQL" {
+    database "PostgreSQL DB"
+  }
+
+  node "Docker Container: Mailhog\n(o SMTP real)" {
+    component "SMTP Server"
+  }
+}
+
+node "Frontend Web App\n(en otro host o CDN)" {
+  component "Cliente Web"
+}
+
+node "Email Sending Service\n(microservicio externo)" {
+  component "API Consumer"
+}
+
+"Cliente Web" --> "Spring Boot App\n(newsletter-service.jar)" : HTTP (subscribe/verify/unsubscribe)
+"API Consumer" --> "Spring Boot App\n(newsletter-service.jar)" : HTTP (get unsubscribe link)
+"Spring Boot App\n(newsletter-service.jar)" --> "PostgreSQL DB" : JDBC
+"Spring Boot App\n(newsletter-service.jar)" --> "SMTP Server" : SMTP (port 587/1025)
+
+@enduml

@@ -1,0 +1,26 @@
+@startuml component_diagram_newsletter_service
+
+title Diagrama de Componentes - Newsletter Service
+
+package "newsletter-service" {
+  
+  [NewsletterController] --> [NewsletterService]
+
+  [NewsletterService] --> [TokenService]
+  [NewsletterService] --> [EmailService]
+  [NewsletterService] --> [SubscriberRepository]
+  
+  [TokenService] --> [VerificationTokenRepository]
+
+  [EmailService] --> [SMTP Server] : send confirmation/unsubscribe email
+}
+
+[Frontend WebApp] --> [NewsletterController] : subscribe / verify and unsubscribe flow
+
+[Email Sender Newsletter] --> [NewsletterController] : getUnsubscribeLink
+
+[NewsletterController] ..> [OpenAPI Docs] : exposed via Swagger
+[SubscriberRepository] --> [PostgreSQL DB]
+[VerificationTokenRepository] --> [PostgreSQL DB]
+
+@enduml

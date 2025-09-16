@@ -1,0 +1,37 @@
+@startuml subscribe_sequence_diagram
+actor Usuario
+
+participant "NewsletterController" as Controller
+participant "NewsletterService" as Service
+participant "TokenService" as TokenService
+participant "EmailService" as EmailService
+participant "SubscriberRepository" as Repo
+participant "VerificationTokenRepository" as TokenRepo
+
+Usuario -> Controller : POST /subscribe (email, userCreated)
+
+activate Controller
+Controller -> Service : subscribe(email, userCreated)
+activate Service
+
+Service -> Repo : findByEmail(email)
+
+Repo -> Service : return if emails exits or not
+alt Email ya suscrito y activo
+    Service --> Controller : "Ya estás suscrito"
+else Email suscrito pero PENDING
+    Service -> TokenRepo : invalidateOldTokens(email)
+    Service -> TokenService : generateToken(CONFIRMATION)
+    Service -> EmailService : sendConfirmationEmail(email, token)
+    Service --> Controller : "Email reenviado"
+else Nuevo email
+    Service -> Repo : save(new Subscriber(status = PENDING))
+    Service -> TokenService : generateToken(CONFIRMATION)
+    Service -> EmailService : sendConfirmationEmail(email, token)
+    Service --> Controller : "Suscripción pendiente de confirmación"
+end
+
+deactivate Service
+deactivate Controller
+
+@enduml
