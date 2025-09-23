@@ -7,12 +7,11 @@ package "newsletter-service" {
   [NewsletterController] --> [NewsletterService]
 
   [NewsletterService] --> [TokenService]
-  [NewsletterService] --> [EmailService]
   [NewsletterService] --> [SubscriberRepository]
+  [NewsletterService] --> [EmailService]
   
   [TokenService] --> [VerificationTokenRepository]
 
-  [EmailService] --> [SMTP Server] : send confirmation/unsubscribe email
 }
 
 [Frontend WebApp] --> [NewsletterController] : subscribe / verify and unsubscribe flow
@@ -22,5 +21,6 @@ package "newsletter-service" {
 [NewsletterController] ..> [OpenAPI Docs] : exposed via Swagger
 [SubscriberRepository] --> [PostgreSQL DB]
 [VerificationTokenRepository] --> [PostgreSQL DB]
+[EmailService] --> [SMTP Server] : send confirmation email
 
 @enduml
