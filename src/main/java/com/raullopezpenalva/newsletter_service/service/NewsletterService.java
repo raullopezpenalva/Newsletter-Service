@@ -3,86 +3,82 @@ package com.raullopezpenalva.newsletter_service.service;
 import com.raullopezpenalva.newsletter_service.model.Subscriber;
 import com.raullopezpenalva.newsletter_service.model.SubscriptionStatus;
 import com.raullopezpenalva.newsletter_service.model.TokenType;
-import com.raullopezpenalva.newsletter_service.model.VerificationToken;
 import com.raullopezpenalva.newsletter_service.repository.SubscriberRepository;
 import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
-import com.raullopezpenalva.newsletter_service.service.EmailService;
-import com.raullopezpenalva.newsletter_service.service.TokenService;
-import com.weaver.email_service.service.EmailService.SubscribeResult;
 
-import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
-import javax.swing.UIDefaults.ActiveValue;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class NewsletterService {
 
+    @Autowired
     private final SubscriberRepository subscriberRepository;
     private final VerificationTokenRepository verificationTokenRepository;
+    private final TokenService tokenService;
+    private EmailService emailService;
+
     // Constructor is no longer needed due to @RequiredArgsConstructor
 
     // Service methods go here
-    public List<Subscriber> getAllSubscribers() {
-        return subscriberRepository.findAll();
-    }
 
-    public record SubscriptionResult (Subscriber subscriber) {}
+    public record SubscribeResult (String finalStatus) {}
 
-    public SubscriptionResult subscribe(Subscriber rawSubscriber) {
+    public SubscribeResult subscribe(Subscriber rawSubscriber) {
         String norm = rawSubscriber.getEmail() == null ? "" : rawSubscriber.getEmail().trim().toLowerCase();
 
-        var existed = subscriberRepository.findByEmailIgnoreCase(norm);
+        var existed = subscriberRepository.findByEmail(norm);
         
-        if (existed.isPresent()) {
-            existed.get().setStatus(SubscriptionStatus.ACTIVE);
-            return new SubscriptionResult(existed.get());
+        if (existed.isPresent() && existed.get().getStatus() == SubscriptionStatus.ACTIVE) {
+            return new SubscribeResult("already_subscribed");
+
         } else if (existed.isPresent() && existed.get().getStatus() == SubscriptionStatus.PENDING) {
             // Generate new token, invalidate old tokens and send verification email again
-            invalidateTokens(existed.get().getId(), TokenType.CONFIRMATION);
-            var token = createToken(existed.get().getId(), TokenType.CONFIRMATION);
-            emailService.sendVerificationEmail(existed.get(), token);
-            return new SubscriptionResult(existed.get());
-        }else {
+            tokenService.invalidateTokens(existed.get().getId(), TokenType.CONFIRMATION);
+            var token = tokenService.createToken(existed.get().getId(), TokenType.CONFIRMATION);
+            emailService.sendVerificationEmail(existed.get().getEmail(), token);
+            return new SubscribeResult("confirmation_email_sent");
+
+        } else {
             var newSubscriber = new Subscriber();
             newSubscriber.setEmail(norm);
             if (rawSubscriber.isUserCreated()) {
                 newSubscriber.setStatus (SubscriptionStatus.ACTIVE);
                 newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
-                var saved = subscriberRepository.save(newSubscriber);
-                return new SubscriptionResult(saved);
+                subscriberRepository.save(newSubscriber);
+                return new SubscribeResult("subscribed");
             }
             newSubscriber.setStatus(SubscriptionStatus.PENDING);
             newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
             var saved = subscriberRepository.save(newSubscriber);
             // Generate verification token, save it and send verification email
-            var token = createToken(saved.getId(), TokenType.CONFIRMATION);
-            emailService.sendVerificationEmail(saved, token);
-            return new SubscriptionResult(saved);
+            var token = tokenService.createToken(saved.getId(), TokenType.CONFIRMATION);
+            emailService.sendVerificationEmail(saved.getEmail(), token);
+            return new SubscribeResult("confirmation_email_sent");
         }
     }
 
-    public record confirmSubscription(boolean success, String message) {}
+    public record ConfirmSubscription(boolean success, String message) {}
 
-    public confirmSubscription(String token) {
-        VerificationResult result = TokenService.verifyToken(token);
+    public ConfirmSubscription confirmSubscription(String token) {
+        var result = tokenService.verifyToken(token);
         if (result.success() == false) {
-            return new confirmSubscription(false, result.getMessage());
+            return new ConfirmSubscription(false, result.message());
         }
 
         // Mark token as used
-        UUID tokenID = result.getTokenId();
+        UUID tokenID = result.tokenId();
         verificationTokenRepository.markUsed(tokenID);
 
         // Update subscriber status to ACTIVE
-        UUID subscriberID = verificationToken.getSubscriberId();
-        subscriberRepository.activateSubscriber(subscriberID);
+        subscriberRepository.activateSubscriber(result.subscriberId());
 
-        return new confirmSubscription(true, "Subscription verified");
+        return new ConfirmSubscription(true, result.message() + "- Subscription verified");
     }
 }

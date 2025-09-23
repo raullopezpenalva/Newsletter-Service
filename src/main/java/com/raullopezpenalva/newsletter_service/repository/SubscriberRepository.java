@@ -2,6 +2,9 @@ package com.raullopezpenalva.newsletter_service.repository;
 
 import com.raullopezpenalva.newsletter_service.model.Subscriber;
 import com.raullopezpenalva.newsletter_service.model.SubscriptionStatus;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

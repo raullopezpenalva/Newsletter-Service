@@ -23,6 +23,7 @@ public class Subscriber {
     private UUID id;
 
     @Email
+    @NotBlank
     @Column(nullable = false, unique = true)
     private String email;
 

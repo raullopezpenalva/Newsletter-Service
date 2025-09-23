@@ -2,22 +2,22 @@
 left to right direction
 skinparam packageStyle rectangle
 
-actor "Usuario Anónimo" as Anonymous
-actor "Usuario Registrado" as Registered
-control "Sistema de Envío de Emails" as EmailSystem
-actor "Administrador" as Admin
+actor "Anonymous User" as Anonymous
+actor "Registered User" as Registered
+control "Email Sending System" as EmailSystem
+actor "Administrator" as Admin
 
 package "Newsletter Service" {
-    usecase "Suscribirse al newsletter" as UC_Subscribe
-    usecase "Confirmar suscripción" as UC_Verify
-    usecase "Ver formulario de baja" as UC_UnsubPage
-    usecase "Confirmar baja con motivo" as UC_UnsubConfirm
-    usecase "Obtener link personalizado de baja" as UC_GenUnsubLink
-    usecase "Ver lista de suscriptores" as UC_ListSubscribers
-    usecase "Ver métricas de suscriptores" as UC_Stats
+    usecase "Subscribe to newsletter" as UC_Subscribe
+    usecase "Confirm subscription" as UC_Verify
+    usecase "View unsubscribe form" as UC_UnsubPage
+    usecase "Confirm unsubscribe with reason" as UC_UnsubConfirm
+    usecase "Get personalized unsubscribe link" as UC_GenUnsubLink
+    usecase "View subscriber list" as UC_ListSubscribers
+    usecase "View subscriber metrics" as UC_Stats
 }
 
-' Relaciones
+' Relationships
 Anonymous --> UC_Subscribe
 Anonymous --> UC_Verify
 Anonymous --> UC_UnsubPage
@@ -25,6 +25,7 @@ Anonymous --> UC_UnsubConfirm
 
 Registered --> UC_Subscribe : via userCreated=true
 Registered --> UC_UnsubPage
+Registered --> UC_UnsubConfirm
 
 EmailSystem --> UC_GenUnsubLink
 

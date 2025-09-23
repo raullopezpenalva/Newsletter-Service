@@ -11,11 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken, UUID> {
     Optional<VerificationToken> findByToken(String token);
-    Optional<VerificationToken> findBySubscriberIdAndType(UUID subscriberId, TokenType type);
+    List<VerificationToken> findBySubscriberIdAndType(UUID subscriberId, TokenType type);
 
     @Modifying
     @Transactional

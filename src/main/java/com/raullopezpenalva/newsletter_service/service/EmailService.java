@@ -1,13 +1,10 @@
 package com.raullopezpenalva.newsletter_service.service;
 
 import com.raullopezpenalva.newsletter_service.model.Subscriber;
-import com.raullopezpenalva.newsletter_service.model.SubscriptionStatus;
-import com.raullopezpenalva.newsletter_service.model.TokenType;
 import com.raullopezpenalva.newsletter_service.model.VerificationToken;
-import com.raullopezpenalva.newsletter_service.repository.SubscriberRepository;
-import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,15 +13,14 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 @RequiredArgsConstructor
 public class EmailService {
 
+    @Autowired
     private final JavaMailSender mailSender;
-    private final SubscriberRepository subscriberRepository;
-    private final VerificationTokenRepository verificationTokenRepository;
-
-    @Value("${app.frontend.base-url}")
+    
+    @Value("${http://192.168.200.62:8082}")
     private String frontendBaseUrl;
 
-    public void sendVerificationEmail(Subscriber subscriber, VerificationToken token) {
-        String to = subscriber.getEmail();
+    public void sendVerificationEmail(String toEmail, VerificationToken token) {
+        String to = toEmail;
         String subject = "Please verify your email address";
         String verificationUrl = String.format("%s/verify?token=%s", frontendBaseUrl, token.getId());
         String text = String.format("Click the following link to verify your email address: %s", verificationUrl);

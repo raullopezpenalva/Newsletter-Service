@@ -1,5 +1,6 @@
 @startuml unsubscribe_sequence_diagram
 actor Usuario
+entity "NeswletterEmailSenderService" as EmailSenderService
 
 participant "NewsletterController" as Controller
 participant "NewsletterService" as Service
@@ -9,19 +10,30 @@ participant "SubscriberRepository" as Repo
 participant "VerificationTokenRepository" as TokenRepo
 participant "Unsubscribe landing page" as FrontendService
 
-EmailService -> Controller : Get generateUnsubscribeLink()
-activate EmailService
+EmailSenderService -> Controller : GET /getUnsubscribeLink (email)
+activate EmailSenderService
 activate Controller
-Controller -> TokenService : generates the token
+Controller -> Service : generateUnsubscribeLink(email)
+activate Service
+Service -> Repo : findByEmail(email) with status=ACTIVE
+activate Repo
+Repo --> Service : return Subscriber
+deactivate Repo
+Service -> TokenService : generates the UNSUBSCRIBE token
 activate TokenService
 TokenService -> TokenRepo : save the token
-TokenService -> Controller : return generated Token
+TokenService -> Service : return generated Token
 deactivate TokenService
-Controller -> EmailService : return generatedUnsubscribeLink()
-deactivate Controller
-EmailService -> Usuario : Sends newsletters emails with personal unsubscribe link 
+Service -> EmailService : generatedUnsubscribeLink(token)
+activate EmailService
+EmailService --> Service : return unsubscribe link
 deactivate EmailService
-
+Service --> Controller : return unsubscribe link
+deactivate Service
+Controller --> EmailSenderService : return unsubscribe link
+deactivate Controller
+EmailSenderService -> Usuario : Sends newsletters emails with personal unsubscribe link 
+deactivate EmailSenderService
 activate Usuario
 Usuario -> Controller : GET with personal token unsubscribe link
 deactivate Usuario
@@ -36,19 +48,32 @@ deactivate FrontendService
 
 activate Usuario
 Usuario -> Controller : User fill in the poll and clic the unsubscribe button
+deactivate Usuario
 activate Controller 
-Controller -> Service : Checks if the confirm endpoint token is the same as the personal unsubscribe link
+Controller -> Service : Checks if the token is valid
 activate Service
-Service -> TokenRepo : getToken()
+Service -> TokenService : findByToken(token) and check if not used, not expired and Unsubscribe type
+activate TokenService
+TokenService -> TokenRepo : findById(token)
 activate TokenRepo
-TokenRepo -> Service : return token
+TokenRepo -> TokenService : return token
 deactivate TokenRepo
+TokenService --> Service : return token if valid or throw exception
+deactivate TokenService
 
 alt Token is correct
   Service -> Repo : change subscribe status to: UNSUBSCRIBE
   activate Repo
   Repo -> Service : return status
   deactivate Repo
+  Service -> TokenService : invalidate the token (set used=true)
+  activate TokenService
+  TokenService -> TokenRepo : findById(token), set used=true and save
+  activate TokenRepo
+  TokenRepo --> TokenService : return updated token
+  deactivate TokenRepo
+  TokenService --> Service : return
+  deactivate TokenService
   Service -> Controller : return status ok
   Controller -> FrontendService : return status ok
   activate FrontendService

@@ -1,24 +1,22 @@
 package com.raullopezpenalva.newsletter_service.service;
 
-import com.raullopezpenalva.newsletter_service.model.Subscriber;
-import com.raullopezpenalva.newsletter_service.model.SubscriptionStatus;
 import com.raullopezpenalva.newsletter_service.model.TokenType;
 import com.raullopezpenalva.newsletter_service.model.VerificationToken;
-import com.raullopezpenalva.newsletter_service.repository.SubscriberRepository;
 import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class TokenService {
 
+    @Autowired
     private final VerificationTokenRepository verificationTokenRepository;
     // Constructor is no longer needed due to @RequiredArgsConstructor
 
@@ -39,28 +37,28 @@ public class TokenService {
     }
 
     public void invalidateTokens(UUID subscriberId, TokenType type) {
-        List<VerificationToken> tokens = verificationTokenRepository.findBySubscriberIdAndTypeAndUsedFalse(subscriberId, type);
+        List<VerificationToken> tokens = verificationTokenRepository.findBySubscriberIdAndType(subscriberId, type);
         for (var token : tokens) {
             token.setUsed(true);
         }
         verificationTokenRepository.saveAll(tokens);
     }
 
-    public record VerificationResult(boolean success, String message, UUID tokenId) {}
+    public record VerificationResult(boolean success, String message, UUID tokenId, UUID subscriberId) {}
 
-    public static VerificationResult verifyToken(String token) {
+    public VerificationResult verifyToken(String token) {
         var vtoken = verificationTokenRepository.findByToken(token);
         if (vtoken.isEmpty()) {
-            return new VerificationResult(false, "Invalid token", null);
+            return new VerificationResult(false, "Invalid token", null, null);
         }
         var verificationToken = vtoken.get();
         if (verificationToken.isUsed()) {
-            return new VerificationResult(false, "Token already used", verificationToken.getId());
+            return new VerificationResult(false, "Token already used", verificationToken.getId(), verificationToken.getSubscriberId());
         }
         if (verificationToken.getExpiresAt() != null && verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            return new VerificationResult(false, "Token expired", verificationToken.getId());
+            return new VerificationResult(false, "Token expired", verificationToken.getId(), verificationToken.getSubscriberId());
         }
-        return new VerificationResult(true, "Token is valid", verificationToken.getId());
+        return new VerificationResult(true, "Token is valid", verificationToken.getId(), verificationToken.getSubscriberId());
     }
 
 }

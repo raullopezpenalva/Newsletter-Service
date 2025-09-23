@@ -6,9 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.raullopezpenalva.newsletter_service.service.NewsletterService;
 import org.springframework.http.*;
 
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/newsletter")
@@ -17,29 +15,26 @@ public class NewsletterController {
     @Autowired
     private NewsletterService newsletterService;
 
-    @GetMapping("/admin/subscribers")
-    public ResponseEntity<List<Subscriber>> getAllSubscribers() {
-        List<Subscriber> subscribers = newsletterService.getAllSubscribers();
-        return ResponseEntity.ok(subscribers);
-    }
-
     @PostMapping("/subscribe")
     public ResponseEntity<Map<String, Object>> subscribe(@RequestBody Subscriber bodySubscriber) {
-        var result = newsletterService.subscribe(bodySubscriber.getEmail()); // Subscribe email; result.existed() true if already present
+        var result = newsletterService.subscribe(bodySubscriber); // Subscribe email; result.existed() true if already present
 
         Map<String, Object> payload = Map.<String, Object>of(
-            "status", result.gestStatus(),
-            "email", result.getEmail(),
-            "from user", result.isUserCreated()
+            "status", result.finalStatus(),
+            "message", switch (result.finalStatus()) {
+                case "already_subscribed" -> "You are already subscribed.";
+                case "subscribed" -> "You have been successfully subscribed.";
+                case "confirmation_email_sent" -> "A confirmation email has been sent to your email address.";
+                default -> "Unknown status.";
+            }
         );
-        if (result.getStatus() == SubscriptionStatus.ACTIVE) {
-            payload.put("message", "You are already subscribed.");
+        if (result.finalStatus() == "already_subscribed") {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(payload);
+        } else if (result.finalStatus() == "confirmation_email_sent") {
             return ResponseEntity.status(HttpStatus.OK).body(payload);
-        }
 
-        return ResponseEntity
-            .status(result.existed() ? HttpStatus.OK : HttpStatus.CREATED)
-            .body(payload);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(payload);
     }
 
     @GetMapping("/verify")
@@ -48,16 +43,18 @@ public class NewsletterController {
         if (result.success() == true) {
             Map<String, Object> payload = Map.<String, Object>of(
                 "status", "ACTIVE",
-                "message", result.getMessage()
+                "message", result.message()
             );
             return ResponseEntity.ok(payload);
         } else {
             Map<String, Object> payload = Map.<String, Object>of(
-                "status", "error",
-                "messge", result.getMessage()
+                "status", "FAILED",
+                "messge", result.message()
             );
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(payload);
         }
 
     }
+
+
 }

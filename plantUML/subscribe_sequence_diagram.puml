@@ -1,5 +1,5 @@
 @startuml subscribe_sequence_diagram
-actor Usuario
+actor User
 
 participant "NewsletterController" as Controller
 participant "NewsletterService" as Service
@@ -8,27 +8,60 @@ participant "EmailService" as EmailService
 participant "SubscriberRepository" as Repo
 participant "VerificationTokenRepository" as TokenRepo
 
-Usuario -> Controller : POST /subscribe (email, userCreated)
+User -> Controller : POST /subscribe (email, userCreated)
 
 activate Controller
 Controller -> Service : subscribe(email, userCreated)
 activate Service
 
 Service -> Repo : findByEmail(email)
+activate Repo
+Repo --> Service : return if email exists or not
+deactivate Repo
 
-Repo -> Service : return if emails exits or not
-alt Email ya suscrito y activo
-    Service --> Controller : "Ya estás suscrito"
-else Email suscrito pero PENDING
-    Service -> TokenRepo : invalidateOldTokens(email)
+alt Email already subscribed and active
+    Service --> Controller : "Already subscribed"
+    Controller --> User : "Already subscribed"
+else Email subscribed but PENDING
+    Service -> TokenService : invalidateOldTokens(email)
+    activate TokenService
+    TokenService -> TokenRepo : findAll CONFIRMATION tokens by email and set used=true
+    activate TokenRepo
+    TokenRepo --> TokenService : return updated tokens
+    deactivate TokenRepo
+    TokenService --> Service : return
+    deactivate TokenService
     Service -> TokenService : generateToken(CONFIRMATION)
+    activate TokenService
+    TokenService -> TokenRepo : save(token)
+    activate TokenRepo
+    TokenRepo --> TokenService : return saved token
+    deactivate TokenRepo
+    TokenService --> Service : return token
+    deactivate TokenService
     Service -> EmailService : sendConfirmationEmail(email, token)
-    Service --> Controller : "Email reenviado"
-else Nuevo email
+    Service --> Controller : "Confirmation email resent"
+    Controller --> User : "Subscription pending confirmation"
+else New email
+    alt Email associated to already created user
+    Service -> Repo : save(new Subscriber(status = ACTIVE))
+    Service --> Controller : "Active subscription"
+    Controller --> User : "Active subscription"
+
+    else Email not associated to a user
     Service -> Repo : save(new Subscriber(status = PENDING))
     Service -> TokenService : generateToken(CONFIRMATION)
+    activate TokenService
+    TokenService -> TokenRepo : save(token)
+    activate TokenRepo
+    TokenRepo --> TokenService : return saved token
+    deactivate TokenRepo
+    TokenService --> Service : return token
+    deactivate TokenService
     Service -> EmailService : sendConfirmationEmail(email, token)
-    Service --> Controller : "Suscripción pendiente de confirmación"
+    Service --> Controller : "Subscription pending confirmation"
+    Controller --> User : "Subscription pending confirmation"
+    end
 end
 
 deactivate Service

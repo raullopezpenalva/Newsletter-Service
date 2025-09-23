@@ -1,7 +1,6 @@
 package com.raullopezpenalva.newsletter_service.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -24,12 +23,16 @@ public class VerificationToken {
     @Column(nullable = false, unique = true)
     private String token;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscriber_id", nullable = false)
+    @Column(name = "subscriber_id", nullable = false)
     private UUID subscriberId;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean used = false;
+
+    public VerificationToken(boolean used) {
+        this.used = used;
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
