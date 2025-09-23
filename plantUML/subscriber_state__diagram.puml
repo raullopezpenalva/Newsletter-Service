@@ -1,18 +1,12 @@
 @startuml state_diagram_subscriber
 
-title Ciclo de vida de un Subscriber
+title Lifecycle of a Subscriber
 
-[*] --> Nuevo
+[*] --> PENDING : New manual subscription
+[*] --> ACTIVE : Automatic subscription due to userCreated=true
 
-state Nuevo {
-    [*] --> PENDING
-}
-
-PENDING --> ACTIVE : Confirmación por token (CONFIRMATION)
-PENDING --> UNSUBSCRIBED : Baja antes de confirmar (raro, pero posible)
-ACTIVE --> UNSUBSCRIBED : Confirmación de baja (token UNSUBSCRIBE)
-UNSUBSCRIBED --> PENDING : Nueva suscripción manual (re-registro)
-UNSUBSCRIBED --> ACTIVE : Suscripción automática por userCreated=true
+PENDING --> ACTIVE : Confirmation via token (CONFIRMATION)
+ACTIVE --> UNSUBSCRIBED : Unsubscription confirmation (UNSUBSCRIBE token)
+UNSUBSCRIBED --> PENDING : New manual subscription (re-registration)
 
 @enduml
-
