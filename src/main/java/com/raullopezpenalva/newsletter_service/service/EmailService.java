@@ -16,7 +16,7 @@ public class EmailService {
     @Autowired
     private final JavaMailSender mailSender;
     
-    @Value("${http://192.168.200.62:8082}")
+    @Value("${app.frontend.base-url}")
     private String frontendBaseUrl;
 
     public void sendVerificationEmail(String toEmail, VerificationToken token) {
