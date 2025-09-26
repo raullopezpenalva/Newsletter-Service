@@ -12,6 +12,7 @@ This repository delivers a robust microservice built with **Spring Boot** for co
     - [Classes](#classes)
   - [Repository Structure](#repository-structure)
     - [Folders structure](#folders-structure)
+    - [Components](#components)
   - [Use case and flows](#use-case-and-flows)
   - [Endpoints](#endpoints)
   - [Security](#security)
@@ -105,8 +106,11 @@ newsletter-service/
 ├── Dockerfile
 └── pom.xml
 ```
+### Components
 
+The repository is organized into distinct components to promote a clear structure and ensure scalability of the service. This modular approach facilitates maintainability, enables easier feature expansion, and supports best practices in microservice architecture.
 
+*![Component Diagram](./out/plantUML/components_diagram/component_diagram_newsletter_service.png)
 
 ## Use case and flows
 
