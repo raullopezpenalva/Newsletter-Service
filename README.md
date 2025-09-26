@@ -11,6 +11,7 @@ This repository delivers a robust microservice built with **Spring Boot** for co
     - [VerificationToken](#verificationtoken)
     - [Classes](#classes)
   - [Repository Structure](#repository-structure)
+    - [Folders structure](#folders-structure)
   - [Use case and flows](#use-case-and-flows)
   - [Endpoints](#endpoints)
   - [Security](#security)
@@ -62,8 +63,7 @@ Represents a token.
 
 
 ### Classes
-
-Also this repository has the services classes that define the bussine logic by it funtion.
+Additionally, this repository contains service classes that encapsulate the business logic for each core functionality. Each service is designed with a clear separation of concerns, ensuring maintainability and scalability of the application.
 
 - **Newsletter Service**
 - **Token Service**
@@ -74,34 +74,39 @@ Also this repository has the services classes that define the bussine logic by i
 
 ## Repository Structure
 
+### Folders structure
+```plaintext
 newsletter-service/
-    src/
-        main/
-            java/com/raullopezpenalva/newsletter/
-                config/
-                controller/
-                    NewsletterController.java
-                model/
-                    Subscriber.java
-                    VerificationToken.java
-                    SubscriptionStatus.java
-                    TokeType.java
-                repository/
-                    SubscriberRepository.java
-                    VerificationTokenRepository.java
-                service/
-                    NewsletterService.java
-                    TokenService.java
-                    EmailService.java
-                NewsletterServiceApplication.java
-            resources/
-                application.properties
-        test/java/com/raullopezpenalva/newsletter_service
-            NewsletterServiceApplicationTests.java
-    target # maven output.jar
-    docker-compose.yml
-    Dockerfile
-    pom.xml
+├── src/
+│   ├── main/
+│   │   ├── java/com/raullopezpenalva/newsletter/
+│   │   │   ├── config/
+│   │   │   ├── controller/
+│   │   │   │   └── NewsletterController.java
+│   │   │   ├── model/
+│   │   │   │   ├── Subscriber.java
+│   │   │   │   ├── VerificationToken.java
+│   │   │   │   ├── SubscriptionStatus.java
+│   │   │   │   └── TokeType.java
+│   │   │   ├── repository/
+│   │   │   │   ├── SubscriberRepository.java
+│   │   │   │   └── VerificationTokenRepository.java
+│   │   │   ├── service/
+│   │   │   │   ├── NewsletterService.java
+│   │   │   │   ├── TokenService.java
+│   │   │   │   └── EmailService.java
+│   │   │   └── NewsletterServiceApplication.java
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/java/com/raullopezpenalva/newsletter_service/
+│       └── NewsletterServiceApplicationTests.java
+├── target/                # maven output .jar
+├── docker-compose.yml
+├── Dockerfile
+└── pom.xml
+```
+
+
 
 ## Use case and flows
 
