@@ -28,12 +28,15 @@ public class TokenService {
         verificationToken.setSubscriberId(subscriberId);
         verificationToken.setType(type);
         verificationToken.setUsed(false);
+        verificationToken.setCreatedAt(LocalDateTime.now());
         if (type == TokenType.CONFIRMATION) {
             verificationToken.setExpiresAt(LocalDateTime.now().plusHours(24)); // 24 hours for verification tokens
         } else if (type == TokenType.UNSUBSCRIBE) {
             verificationToken.setExpiresAt(LocalDateTime.now().plusDays(7)); // 7 days for unsubscribe tokens
         }
-        return verificationTokenRepository.save(verificationToken);
+        VerificationToken savedToken = verificationTokenRepository.save(verificationToken);
+        System.out.println("Created token: " + savedToken.getToken() + " for subscriber ID: " + savedToken.getSubscriberId());
+        return savedToken;
     }
 
     public void invalidateTokens(UUID subscriberId, TokenType type) {

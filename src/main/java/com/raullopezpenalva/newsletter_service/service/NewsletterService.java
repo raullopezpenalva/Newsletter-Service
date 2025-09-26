@@ -6,10 +6,10 @@ import com.raullopezpenalva.newsletter_service.model.TokenType;
 import com.raullopezpenalva.newsletter_service.repository.SubscriberRepository;
 import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
 
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class NewsletterService {
     private final SubscriberRepository subscriberRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final TokenService tokenService;
-    private EmailService emailService;
+    private final EmailService emailService;
 
     // Constructor is no longer needed due to @RequiredArgsConstructor
 
@@ -34,6 +34,7 @@ public class NewsletterService {
         String norm = rawSubscriber.getEmail() == null ? "" : rawSubscriber.getEmail().trim().toLowerCase();
 
         var existed = subscriberRepository.findByEmail(norm);
+        System.out.println("Result of findByEmail "+ existed);
         
         if (existed.isPresent() && existed.get().getStatus() == SubscriptionStatus.ACTIVE) {
             return new SubscribeResult("already_subscribed");
@@ -43,24 +44,31 @@ public class NewsletterService {
             tokenService.invalidateTokens(existed.get().getId(), TokenType.CONFIRMATION);
             var token = tokenService.createToken(existed.get().getId(), TokenType.CONFIRMATION);
             emailService.sendVerificationEmail(existed.get().getEmail(), token);
+            System.out.println("Resent verification email to: " + existed.get().getEmail());
             return new SubscribeResult("confirmation_email_sent");
 
         } else {
             var newSubscriber = new Subscriber();
-            newSubscriber.setEmail(norm);
-            if (rawSubscriber.isUserCreated()) {
+            if (rawSubscriber.isUserCreated() == true) {
+                newSubscriber.setEmail(norm);
                 newSubscriber.setStatus (SubscriptionStatus.ACTIVE);
                 newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
-                subscriberRepository.save(newSubscriber);
+                newSubscriber.setCreatedAt(LocalDateTime.now());
+                var saved = subscriberRepository.save(newSubscriber);
+                System.out.println("Saved subscriber: " + saved.getEmail() + " with ID: " + saved.getId());
                 return new SubscribeResult("subscribed");
+            } else {
+                newSubscriber.setEmail(norm);
+                newSubscriber.setStatus(SubscriptionStatus.PENDING);
+                newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
+                newSubscriber.setCreatedAt(LocalDateTime.now());
+                var saved = subscriberRepository.save(newSubscriber);
+                System.out.println("Saved subscriber: " + saved.getEmail() + " with ID: " + saved.getId());
+                // Generate verification token, save it and send verification email
+                var token = tokenService.createToken(saved.getId(), TokenType.CONFIRMATION);
+                emailService.sendVerificationEmail(saved.getEmail(), token);
+                return new SubscribeResult("confirmation_email_sent");
             }
-            newSubscriber.setStatus(SubscriptionStatus.PENDING);
-            newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
-            var saved = subscriberRepository.save(newSubscriber);
-            // Generate verification token, save it and send verification email
-            var token = tokenService.createToken(saved.getId(), TokenType.CONFIRMATION);
-            emailService.sendVerificationEmail(saved.getEmail(), token);
-            return new SubscribeResult("confirmation_email_sent");
         }
     }
 
