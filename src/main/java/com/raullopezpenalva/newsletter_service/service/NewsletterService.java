@@ -7,6 +7,7 @@ import com.raullopezpenalva.newsletter_service.repository.SubscriberRepository;
 import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.var;
 
 import java.util.UUID;
 import java.time.LocalDateTime;
@@ -54,6 +55,7 @@ public class NewsletterService {
                 newSubscriber.setStatus (SubscriptionStatus.ACTIVE);
                 newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
                 newSubscriber.setCreatedAt(LocalDateTime.now());
+                newSubscriber.setVerifiedAt(LocalDateTime.now());
                 var saved = subscriberRepository.save(newSubscriber);
                 System.out.println("Saved subscriber: " + saved.getEmail() + " with ID: " + saved.getId());
                 return new SubscribeResult("subscribed");
@@ -85,7 +87,10 @@ public class NewsletterService {
         verificationTokenRepository.markUsed(tokenID);
 
         // Update subscriber status to ACTIVE
-        subscriberRepository.activateSubscriber(result.subscriberId());
+        var updateSubscriber = subscriberRepository.findById(result.subscriberId());
+        updateSubscriber.get().setVerifiedAt(LocalDateTime.now());
+
+        subscriberRepository.activateSubscriber(updateSubscriber.get().getId());
 
         return new ConfirmSubscription(true, result.message() + "- Subscription verified");
     }
