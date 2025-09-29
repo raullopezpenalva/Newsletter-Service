@@ -14,6 +14,9 @@ This repository delivers a robust microservice built with **Spring Boot** for co
     - [Folders structure](#folders-structure)
     - [Components](#components)
   - [Use case and flows](#use-case-and-flows)
+    - [Subscription Flow](#subscription-flow)
+    - [Unsubscribe Link Generation Flow](#unsubscribe-link-generation-flow)
+    - [Unsubscribe Flow](#unsubscribe-flow)
   - [Endpoints](#endpoints)
   - [Security](#security)
   - [Configuration](#configuration)
@@ -47,6 +50,10 @@ Represents an individual who is in the process.
 | `createdAt`  | Timestamp| subscrition date                                                 |
 | `verifiedAt` | Timestamp| verification date                                                |
 | `userCreated`| Boolean  | True: comes from a user account -> Don't sent confirmation email |
+
+A subcriber has three states:
+
+*![subscribe_state_diagrama](./out/plantUML/subscriber_state__diagram/state_diagram_subscriber.png)
 
 ### VerificationToken
 
@@ -113,6 +120,49 @@ The repository is organized into distinct components to promote a clear structur
 *![Component Diagram](./out/plantUML/components_diagram/component_diagram_newsletter_service.png)
 
 ## Use case and flows
+
+The use case are designed that the service defines 4 external entities that use the service. 
+
+- **Annonimous subscriber**
+   Is a person that only subscribes to the newsletter and not in ther others services that offers the company.
+   This person has the next flows to use:
+     - Subscribe to newsletter
+     - Confirm subscription
+     - View unsubscribe form
+     - Confirm unsubcribe with reason
+
+- **Registered User**
+  Is a persona that subcribes from creating a user account in the company. This external entity don't need to confirm the subscription because is done by the user creation flow in other micro-service.
+  This person has the next flows to use:
+    - Subscribe to newsletter
+    - Views unsubscribe form
+    - Confirm unsubscribe with reason
+
+- **Email Sending System**
+  This the other micro-service that gets all the emails with active subscription and get the personal unsubscribe link for each email and send the newsletter emails with the personal unsubscribe link.
+  This entity has the flows to use:
+    - Get personalized unsubscribe link
+
+- **Administrator**
+  This is the administratos from the all system. It needs to enter and manage the micro-service.
+  This entity has the flows to use:
+    - View subscriber list
+    - Views subscriber list
+
+*![Use Case Diagram](./out/plantUML/use_case_diagram/use_case_diagram.png)
+
+### Subscription Flow
+
+*![subscribe_sequence_diagram](./out/plantUML/subscribe_sequence_diagram/subscribe_sequence_diagram.png)
+
+### Unsubscribe Link Generation Flow
+
+*![unsubcribelink_generation_sequence_diagram](./out/plantUML/unsubscribelink_generation_sequence_diagram/unsubscribeLink_generation_sequence_diagram.png)
+
+### Unsubscribe Flow
+
+*![unsubscribe_sequence_diagram](./out/plantUML/unsubscribe_sequence_diagram/unsubscribe_sequence_diagram.png)
+
 
 ## Endpoints
 
