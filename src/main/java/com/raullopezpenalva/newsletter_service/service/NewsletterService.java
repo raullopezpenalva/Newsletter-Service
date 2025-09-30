@@ -7,7 +7,6 @@ import com.raullopezpenalva.newsletter_service.repository.SubscriberRepository;
 import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.var;
 
 import java.util.UUID;
 import java.time.LocalDateTime;
