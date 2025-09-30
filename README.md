@@ -18,8 +18,13 @@ This repository delivers a robust microservice built with **Spring Boot** for co
     - [Unsubscribe Link Generation Flow](#unsubscribe-link-generation-flow)
     - [Unsubscribe Flow](#unsubscribe-flow)
   - [Endpoints](#endpoints)
+    - [Subscribe](#subscribe)
   - [Security](#security)
   - [Configuration](#configuration)
+    - [Environment variables](#environment-variables)
+      - [Postgres DB:](#postgres-db)
+      - [MailDev:](#maildev)
+      - [Spring application.properties](#spring-applicationproperties)
   - [Docker Compose](#docker-compose)
 
 ## Used Technologies
@@ -117,7 +122,7 @@ newsletter-service/
 
 The repository is organized into distinct components to promote a clear structure and ensure scalability of the service. This modular approach facilitates maintainability, enables easier feature expansion, and supports best practices in microservice architecture.
 
-*![Component Diagram](./out/plantUML/components_diagram/component_diagram_newsletter_service.png)
+![Component Diagram](./out/plantUML/components_diagram/component_diagram_newsletter_service.png)
 
 ## Use case and flows
 
@@ -149,25 +154,86 @@ The use case are designed that the service defines 4 external entities that use 
     - View subscriber list
     - Views subscriber list
 
-*![Use Case Diagram](./out/plantUML/use_case_diagram/use_case_diagram.png)
+![Use Case Diagram](./out/plantUML/use_case_diagram/use_case_diagram.png)
 
 ### Subscription Flow
 
-*![subscribe_sequence_diagram](./out/plantUML/subscribe_sequence_diagram/subscribe_sequence_diagram.png)
+![subscribe_sequence_diagram](./out/plantUML/subscribe_sequence_diagram/subscribe_sequence_diagram.png)
 
 ### Unsubscribe Link Generation Flow
 
-*![unsubcribelink_generation_sequence_diagram](./out/plantUML/unsubscribelink_generation_sequence_diagram/unsubscribeLink_generation_sequence_diagram.png)
+![unsubcribelink_generation_sequence_diagram](./out/plantUML/unsubscribelink_generation_sequence_diagram/unsubscribeLink_generation_sequence_diagram.png)
 
 ### Unsubscribe Flow
 
-*![unsubscribe_sequence_diagram](./out/plantUML/unsubscribe_sequence_diagram/unsubscribe_sequence_diagram.png)
-
+![unsubscribe_sequence_diagram](./out/plantUML/unsubscribe_sequence_diagram/unsubscribe_sequence_diagram.png)
 
 ## Endpoints
+
+### Subscribe
+
+**POST /newsletter/subscribe**
+
+Request body: JSON
+``` json
+{
+  "email": "test1@email.com",
+  "userCreated": false
+}
+```
 
 ## Security
 
 ## Configuration
+
+### Environment variables
+
+#### Postgres DB:
+  - POSTGRES_USER: admin
+  - POSTGRES_PASSWORD: admin
+  - POSTGRES_DB: newsletter_db
+
+#### MailDev:
+  - WebUI: http://localhost:1080
+  - SMTP: localhost:1025
+
+#### Spring application.properties
+```properties
+# --- Application Properties ---
+spring.application.name=Newsletter Service
+server.port=8080
+
+# --- PostgreSQL Database Configuration ---
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://newsletter_postgres:5432/newsletter_db
+spring.datasource.username=admin
+spring.datasource.password=admin
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
+# --- MailDev (for local testing) SMTP configuration ---
+spring.mail.host=email_service
+spring.mail.port=1025
+spring.mail.username=no-reply@gmail.com
+spring.mail.properties.mail.smtp.starttls.enable=false
+spring.mail.properties.mail.smtp.starttls.required=false
+spring.mail.properties.mail.smtp.auth=false
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+spring.mail.properties.mail.smtp.writetimeout=5000
+
+# --- Security Configuration ---
+spring.security.user.name=admin
+spring.security.user.password=admin
+
+# --- Frontend Base URL ---
+app.frontendBaseUrl=http://localhost:8082/newsletter
+
+# --- Debugging Configuration ---
+logging.level.org.springframework.boot.autoconfigure.jdbc=DEBUG
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.com.zaxxer.hikari=DEBUG
+logging.level.org.springframework.boot.context.config=DEBUG
+```
 
 ## Docker Compose
