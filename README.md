@@ -17,9 +17,7 @@ This repository delivers a robust microservice built with **Spring Boot** for co
     - [Subscription Flow](#subscription-flow)
     - [Unsubscribe Link Generation Flow](#unsubscribe-link-generation-flow)
     - [Unsubscribe Flow](#unsubscribe-flow)
-  - [Endpoints](#endpoints)
-    - [OpenAPI/Swagger](#openapiswagger)
-    - [Subscribe](#subscribe)
+  - [OpenAPI/Swagger](#openapiswagger)
   - [Security](#security)
   - [Configuration](#configuration)
     - [Environment variables](#environment-variables)
@@ -170,8 +168,7 @@ The use case are designed that the service defines 4 external entities that use 
 
 ![unsubscribe_sequence_diagram](./out/plantUML/unsubscribe_sequence_diagram/unsubscribe_sequence_diagram.png)
 
-## Endpoints
-### OpenAPI/Swagger
+## OpenAPI/Swagger
 
 This repository integrates API documentation using **springdoc-openapi-starter-webmvc-ui**, enabling comprehensive and interactive exploration of all available endpoints. The documentation is accessible via two primary methods:
 
@@ -182,18 +179,6 @@ This repository integrates API documentation using **springdoc-openapi-starter-w
   Available at [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs), this endpoint serves the OpenAPI specification in JSON format. The specification can be imported into tools such as SwaggerHub or Postman for further analysis, testing, or integration.
 
 All OpenAPI documentation configuration is centralized in the `OpenApiConfig.java` class within the `config` package, ensuring maintainability and consistency across the service.
-
-### Subscribe
-
-**POST /newsletter/subscribe**
-
-Request body: JSON
-``` json
-{
-  "email": "test1@email.com",
-  "userCreated": false
-}
-```
 
 ## Security
 
