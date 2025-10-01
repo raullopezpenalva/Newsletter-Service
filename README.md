@@ -93,7 +93,7 @@ newsletter-service/
 │   ├── main/
 │   │   ├── java/com/raullopezpenalva/newsletter/
 │   │   │   ├── config/
-|   |   |   |   └── OpenApiConfig.java
+│   │   │   │   └── OpenApiConfig.java
 │   │   │   ├── controller/
 │   │   │   │   └── NewsletterController.java
 │   │   │   ├── model/
