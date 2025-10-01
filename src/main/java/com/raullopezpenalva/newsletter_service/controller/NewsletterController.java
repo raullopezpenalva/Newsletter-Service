@@ -4,6 +4,11 @@ import com.raullopezpenalva.newsletter_service.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.raullopezpenalva.newsletter_service.service.NewsletterService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import org.springframework.http.*;
 
 import java.util.Map;
@@ -15,6 +20,16 @@ public class NewsletterController {
     @Autowired
     private NewsletterService newsletterService;
 
+    @Operation(
+        summary = "Subscribe to the newsletter",
+        description = "Subscribe to the newsletter with your email address. If the email is already subscribed, a conflict status will be returned. If double opt-in is enabled and the request does not originate from user creation, a confirmation email will be sent."
+    )
+    @ApiResponses (value = {
+            @ApiResponse(responseCode = "201", description = "Successfully subscribed"),
+            @ApiResponse(responseCode = "200", description = "Confirmation email sent"),
+            @ApiResponse(responseCode = "409", description = "Email already subscribed")
+        }
+    )
     @PostMapping("/subscribe")
     public ResponseEntity<Map<String, Object>> subscribe(@RequestBody Subscriber bodySubscriber) {
         var result = newsletterService.subscribe(bodySubscriber); // Subscribe email; result.existed() true if already present
@@ -37,6 +52,15 @@ public class NewsletterController {
         return ResponseEntity.status(HttpStatus.CREATED).body(payload);
     }
 
+    @Operation(
+        summary = "Confirm newsletter subscription",
+        description = "Confirm your newsletter subscription using the token sent to your email. If the token is valid, your subscription will be activated."
+    )
+    @ApiResponses (value = {
+            @ApiResponse(responseCode = "200", description = "Subscription confirmed"),
+            @ApiResponse(responseCode = "400", description = "Invalid or expired token")
+        }
+    )
     @GetMapping("/verify")
     public ResponseEntity<Map<String, Object>> confirmSubscription(@RequestParam String token) {
         var result = newsletterService.confirmSubscription(token);
