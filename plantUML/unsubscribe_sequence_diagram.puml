@@ -12,12 +12,30 @@ Usuario -> Controller : GET with personal token unsubscribe link
 activate Usuario
 
 activate Controller
-Controller -> FrontendService : re-directs to unsubscribe landing page
+Controller -> Service : Validates the token
+activate Service
+Service -> TokenService : findByToken(token) and check if not used, not expired and Unsubscribe type
+activate TokenService
+TokenService -> TokenRepo : findById(token)
+activate TokenRepo
+TokenRepo -> TokenService : return token
+deactivate TokenRepo
+TokenService --> Service : return token if valid or throw exception
+deactivate TokenService
+Service -> Controller : return status ok or forbidden
+deactivate Service
+alt Token is correct
+  Controller -> FrontendService : re-directs to unsubscribe landing page
+  activate FrontendService
+  FrontendService -> Usuario : returns landing page with unsubscribe button and poll
+  deactivate FrontendService
+else Token not correct
+  Controller -> FrontendService : re-directs to error page
+  activate FrontendService
+  FrontendService -> Usuario : returns "Error" page
+  deactivate FrontendService
+end
 deactivate Controller
-
-activate FrontendService
-FrontendService -> Usuario : returns landing page with unsubscribe button and poll
-deactivate FrontendService
 
 Usuario -> Controller : User fill in the poll and clic the unsubscribe button
 deactivate Usuario
