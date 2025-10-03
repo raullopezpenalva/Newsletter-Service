@@ -10,8 +10,21 @@ participant "VerificationTokenRepository" as TokenRepo
 
 actor Usuario
 
-EmailSenderService -> Controller : GET /getUnsubscribeLink (email)
+EmailSenderService -> Controller : GET All Active Subscribers
 activate EmailSenderService
+activate Controller
+Controller -> Service : getAllActiveSubscribers()
+activate Service
+Service -> Repo : findAllByStatus(ACTIVE)
+activate Repo
+Repo --> Service : return List<Subscriber>
+deactivate Repo
+Service --> Controller : return List<Subscriber>
+deactivate Service
+Controller --> EmailSenderService : return List<Subscriber>
+deactivate Controller
+
+EmailSenderService -> Controller : GET /getUnsubscribeLink (email)
 activate Controller
 Controller -> Service : generateUnsubscribeLink(email)
 activate Service
