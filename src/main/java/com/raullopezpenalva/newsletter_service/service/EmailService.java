@@ -2,6 +2,7 @@ package com.raullopezpenalva.newsletter_service.service;
 
 import com.raullopezpenalva.newsletter_service.model.VerificationToken;
 import org.springframework.stereotype.Service;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,6 +17,7 @@ public class EmailService {
     @Value("${app.frontendBaseUrl}")
     private String frontendBaseUrl;
 
+    // Send verification email
     public void sendVerificationEmail(String toEmail, VerificationToken token) {
         String to = toEmail;
         String subject = "Please verify your email address";
@@ -33,5 +35,10 @@ public class EmailService {
             e.printStackTrace();
             // Handle exception (e.g., log it)
         }
+    }
+
+    // Generate unsubscribe link
+    public String generateUnsubscribeLink(VerificationToken token) {
+        return String.format("%s/unsubscribe?token=%s", frontendBaseUrl, token.getToken());
     }
 }

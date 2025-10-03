@@ -24,4 +24,5 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, UUID> {
     @Transactional
     @Query ("update Subscriber s set s.status = ACTIVE where s.id = :id")
     int activateSubscriber(@Param("id") UUID id);
+    Iterable<Subscriber> findByStatus(SubscriptionStatus active);
 }

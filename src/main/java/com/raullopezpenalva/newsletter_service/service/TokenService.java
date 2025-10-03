@@ -21,6 +21,8 @@ public class TokenService {
     // Constructor is no longer needed due to @RequiredArgsConstructor
 
     // Service methods go here
+
+    // Create token
     public VerificationToken createToken(UUID subscriberId, TokenType type) {
         var token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken();
@@ -39,6 +41,7 @@ public class TokenService {
         return savedToken;
     }
 
+    // Invalidate tokens
     public void invalidateTokens(UUID subscriberId, TokenType type) {
         List<VerificationToken> tokens = verificationTokenRepository.findBySubscriberIdAndType(subscriberId, type);
         for (var token : tokens) {
@@ -47,6 +50,7 @@ public class TokenService {
         verificationTokenRepository.saveAll(tokens);
     }
 
+    // Verify token
     public record VerificationResult(boolean success, String message, UUID tokenId, UUID subscriberId) {}
 
     public VerificationResult verifyToken(String token) {
@@ -63,5 +67,4 @@ public class TokenService {
         }
         return new VerificationResult(true, "Token is valid", verificationToken.getId(), verificationToken.getSubscriberId());
     }
-
 }

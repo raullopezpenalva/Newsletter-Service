@@ -28,6 +28,7 @@ public class NewsletterService {
 
     // Service methods go here
 
+    // Subscribe method
     public record SubscribeResult (String finalStatus) {}
 
     public SubscribeResult subscribe(Subscriber rawSubscriber) {
@@ -73,6 +74,7 @@ public class NewsletterService {
         }
     }
 
+    // Confirm subscription
     public record ConfirmSubscription(boolean success, String message) {}
 
     public ConfirmSubscription confirmSubscription(String token) {
@@ -92,5 +94,61 @@ public class NewsletterService {
         subscriberRepository.activateSubscriber(updateSubscriber.get().getId());
 
         return new ConfirmSubscription(true, result.message() + "- Subscription verified");
+    }
+
+    // Get active subscribers
+    public Iterable<Subscriber> getActiveSubscribers() {
+        return subscriberRepository.findByStatus(SubscriptionStatus.ACTIVE);   
+    }
+
+    // Generate unsubscribe link
+    public record GenerateUnsubscribeLinkResult (boolean success, String link) {}
+
+    public GenerateUnsubscribeLinkResult generateUnsubscribeLink(String email) {
+        var OpSubscriber = subscriberRepository.findByEmail(email);
+            if (OpSubscriber.isEmpty()) {
+                return new GenerateUnsubscribeLinkResult(false, "Email not found");
+            }
+            var subscriber = OpSubscriber.get();
+            var token = tokenService.createToken(subscriber.getId(), TokenType.UNSUBSCRIBE);
+            var link = emailService.generateUnsubscribeLink(token);
+            return new GenerateUnsubscribeLinkResult(true, link);
+    }
+
+    // Unsubscribe
+    public record UnsubscribeResult (boolean success, String message) {}
+
+    public UnsubscribeResult unsubscribe(String token) {
+        var result = tokenService.verifyToken(token);
+        if (result.success() == false) {
+            return new UnsubscribeResult(false, result.message());
+        }
+        return new UnsubscribeResult(true, "Token is valid, proceed to unsubscription confirmation");
+    }
+
+    // Confirmation of unsubscription
+    public record ConfirmUnsubscriptionResult (boolean success, String message) {}
+
+    public ConfirmUnsubscriptionResult confirmUnsubscription(String token) {
+        var result = tokenService.verifyToken(token);
+        if (result.success() == false) {
+            return new ConfirmUnsubscriptionResult(false, result.message());
+        }
+
+        // Mark token as used
+        UUID tokenID = result.tokenId();
+        verificationTokenRepository.markUsed(tokenID);
+
+        // Update subscriber status to UNSUBSCRIBED
+        var updateSubscriber = subscriberRepository.findById(result.subscriberId());
+        if (updateSubscriber.isEmpty()) {
+            return new ConfirmUnsubscriptionResult(false, "Subscriber not found");
+        }
+        var subscriber = updateSubscriber.get();
+        subscriber.setStatus(SubscriptionStatus.UNSUBSCRIBED);
+        subscriberRepository.save(subscriber);
+
+        return new ConfirmUnsubscriptionResult(true, "Successfully unsubscribed");
+        
     }
 }
