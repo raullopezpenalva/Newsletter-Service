@@ -34,6 +34,7 @@ This repository delivers a robust microservice built with **Spring Boot** for co
     - Spring Data JPA
     - Spring Boot Starter Mail
     - Spring Security Starter
+    - Springdoc openAPI starter
 - PostgreSQL 15
 - MailDev (development email server)
 - Docker & Docker Compose
