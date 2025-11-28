@@ -174,10 +174,10 @@ The use case are designed that the service defines 4 external entities that use 
 This repository integrates API documentation using **springdoc-openapi-starter-webmvc-ui**, enabling comprehensive and interactive exploration of all available endpoints. The documentation is accessible via two primary methods:
 
 - **Swagger UI**  
-  Accessible at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html), this browser-based interface provides a user-friendly visualization of the API, allowing developers to review and test endpoints directly.
+  Accessible at [http://localhost:8082/swagger-ui.html](http://localhost:8080/swagger-ui.html), this browser-based interface provides a user-friendly visualization of the API, allowing developers to review and test endpoints directly.
 
 - **OpenAPI JSON Specification**  
-  Available at [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs), this endpoint serves the OpenAPI specification in JSON format. The specification can be imported into tools such as SwaggerHub or Postman for further analysis, testing, or integration.
+  Available at [http://localhost:8082/v3/api-docs](http://localhost:8080/v3/api-docs), this endpoint serves the OpenAPI specification in JSON format. The specification can be imported into tools such as SwaggerHub or Postman for further analysis, testing, or integration.
 
 All OpenAPI documentation configuration is centralized in the `OpenApiConfig.java` class within the `config` package, ensuring maintainability and consistency across the service.
 
@@ -199,21 +199,21 @@ All OpenAPI documentation configuration is centralized in the `OpenApiConfig.jav
 #### Spring application.properties
 ```properties
 # --- Application Properties ---
-spring.application.name=Newsletter Service
-server.port=8080
+spring.application.name=${SPRING_APPLICATION_NAME}
+server.port=${SPRING_SERVER_PORT}
 
 # --- PostgreSQL Database Configuration ---
 spring.datasource.driver-class-name=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://newsletter_postgres:5432/newsletter_db
-spring.datasource.username=admin
-spring.datasource.password=admin
+spring.datasource.url=${SPRING_DATASOURCE_URL}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 
 # --- MailDev (for local testing) SMTP configuration ---
-spring.mail.host=email_service
-spring.mail.port=1025
-spring.mail.username=no-reply@gmail.com
+spring.mail.host=${SPRING_MAIL_HOST}
+spring.mail.port=${SPRING_MAIL_PORT}
+spring.mail.username=${SPRING_MAIL_USERNAME}
 spring.mail.properties.mail.smtp.starttls.enable=false
 spring.mail.properties.mail.smtp.starttls.required=false
 spring.mail.properties.mail.smtp.auth=false
@@ -222,11 +222,15 @@ spring.mail.properties.mail.smtp.timeout=5000
 spring.mail.properties.mail.smtp.writetimeout=5000
 
 # --- Security Configuration ---
-spring.security.user.name=admin
-spring.security.user.password=admin
+spring.security.user.name=${SPRING_SECURITY_USER_NAME}
+spring.security.user.password=${SPRING_SECURITY_USER_PASSWORD}
+
+# --- JWT Configuration ---
+app.security.jwt.secret=${SPRING_JWT_SECRET}
+app.security.jwt.expirationMs=3600000
 
 # --- Frontend Base URL ---
-app.frontendBaseUrl=http://localhost:8082/newsletter
+app.frontendBaseUrl=${SPRING_FRONTEND_BASE_URL}
 
 # --- Debugging Configuration ---
 logging.level.org.springframework.boot.autoconfigure.jdbc=DEBUG
