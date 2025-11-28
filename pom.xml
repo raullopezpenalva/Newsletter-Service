@@ -49,12 +49,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		-->
 
 		<!-- JWT (jjwt) -->
+		<!--
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -72,7 +75,7 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
-
+		-->
 
 		<!-- DB driver (change if not Postgres) -->
 		<dependency>
@@ -88,6 +91,7 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- OpenAPI / Swagger -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
