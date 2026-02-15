@@ -188,9 +188,9 @@ All OpenAPI documentation configuration is centralized in the `OpenApiConfig.jav
 ### Environment variables
 
 #### Postgres DB:
-  - POSTGRES_USER: admin
-  - POSTGRES_PASSWORD: admin
-  - POSTGRES_DB: newsletter_db
+  - POSTGRES_USER: ${POSTGRES_USER}
+  - POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  - POSTGRES_DB: ${POSTGRES_DB}
 
 #### MailDev:
   - WebUI: http://localhost:1080
