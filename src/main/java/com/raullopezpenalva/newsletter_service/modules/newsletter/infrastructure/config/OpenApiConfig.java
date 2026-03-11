@@ -1,4 +1,4 @@
-package com.raullopezpenalva.newsletter_service.config;
+package com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;

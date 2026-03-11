@@ -1,10 +1,10 @@
-package com.raullopezpenalva.newsletter_service.controller;
-
-import com.raullopezpenalva.newsletter_service.model.*;
+package com.raullopezpenalva.newsletter_service.modules.newsletter.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.raullopezpenalva.newsletter_service.service.NewsletterService;
+
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.service.NewsletterPublicService;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,10 +15,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/newsletter")
-public class NewsletterController {
+public class NewsletterPublicController {
 
     @Autowired
-    private NewsletterService newsletterService;
+    private NewsletterPublicService newsletterService;
 
 
     // Subscribe endpoint
@@ -89,7 +89,9 @@ public class NewsletterController {
         description = "Retrieve a list of all active subscribers to the newsletter."
     )
     @ApiResponses (value = {
-            @ApiResponse(responseCode = "200", description = "List of active subscribers retrieved")
+            @ApiResponse(responseCode = "200", description = "List of active subscribers retrieved"),
+            @ApiResponse(responseCode = "204", description = "No active subscribers found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/subscribers")
     public ResponseEntity<Iterable<Subscriber>> getActiveSubscribers() {
@@ -140,69 +142,13 @@ public class NewsletterController {
         var result = newsletterService.unsubscribe(token);
         if (result.success()) {
             String html = """
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Confirm Unsubscribe - Newsletter Service</title>
-                        <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                                background-color: #f9f9f9;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                height: 100vh;
-                                margin: 0;
-                            }
-                            h1 {
-                                color: #333;
-                                font-size: 2rem;
-                                text-align: center;
-                                margin-bottom: 1rem;
-                            }
-                            .container {
-                                text-align: center;
-                                padding: 2rem;
-                                border: 2px solid #000000;
-                                background-color: #d6d4d4;
-                                border-radius: 8px;
-                                margin-top: 10px;
-                            }
-                            p {
-                                color: #434444;
-                                text-decoration: none;
-                                font-weight: bold;
-                            }
-                            button {
-                                background-color: #8f9091;
-                                color: white;
-                                border: none;
-                                padding: 0.5rem 1rem;
-                                border-radius: 4px;
-                                cursor: pointer;
-                                font-size: 1rem;
-                            }
-                            button:hover {
-                                background-color: #5e5e5f;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h1>Confirm Unsubscribe</h1>
-                            <p>Are you sure you want to unsubscribe from our newsletter?</p>
-                            <form action="/newsletter/confirm-unsubscription" method="GET">
-                                <input type="hidden" name="token" value="%s">
-                                <button type="submit">Yes, Unsubscribe Me</button>
-                            </form>
-                        </div>
+                    
                     """.formatted(token);
-        return ResponseEntity.ok().body(html);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("<h1>Invalid or expired token. Unsubscription failed.</h1>");
+            return ResponseEntity.ok().body(html);
+        
         }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("<h1>Invalid or expired token. Unsubscription failed.</h1>");
+    
     }
 
     // Confirm Unsubscription endpoint
@@ -216,21 +162,18 @@ public class NewsletterController {
         }
     )
     @GetMapping("/confirm-unsubscription")
-    public ResponseEntity<Map<String, Object>> confirmUnsubscription(@RequestParam String token) {
+    public ResponseEntity<String> confirmUnsubscription(@RequestParam String token) {
         var result = newsletterService.confirmUnsubscription(token);
         if (result.success()) {
-            Map<String, Object> payload = Map.<String, Object>of(
-                "status", "unsubscribed",
-                "message", result.message()
-            );
-            return ResponseEntity.ok(payload);
+            String html = """
+                    
+                    """;
+            return ResponseEntity.ok(html);
         } else {
-            Map<String, Object> payload = Map.<String, Object>of(
-                "status", "failed",
-                "message", result.message()
-            );
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(payload);
+            String html = """
+                    
+                    """;
+            return ResponseEntity.ok(html);
         }
     }
-
 }

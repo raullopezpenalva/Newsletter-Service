@@ -1,13 +1,14 @@
-package com.raullopezpenalva.newsletter_service.repository;
+package com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository;
 
-import com.raullopezpenalva.newsletter_service.model.VerificationToken;
-import com.raullopezpenalva.newsletter_service.model.TokenType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.TokenType;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.VerificationToken;
 
 import java.util.Optional;
 import java.util.UUID;

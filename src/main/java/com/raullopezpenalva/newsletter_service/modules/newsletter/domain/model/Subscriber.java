@@ -1,4 +1,4 @@
-package com.raullopezpenalva.newsletter_service.model;
+package com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model;
     
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;

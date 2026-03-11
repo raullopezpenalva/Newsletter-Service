@@ -1,7 +1,8 @@
-package com.raullopezpenalva.newsletter_service.service;
+package com.raullopezpenalva.newsletter_service.modules.platform.notification.application.service;
 
-import com.raullopezpenalva.newsletter_service.model.VerificationToken;
 import org.springframework.stereotype.Service;
+
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.VerificationToken;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

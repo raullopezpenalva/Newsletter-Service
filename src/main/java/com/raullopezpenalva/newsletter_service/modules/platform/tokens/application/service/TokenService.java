@@ -1,8 +1,9 @@
-package com.raullopezpenalva.newsletter_service.service;
+package com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.service;
 
-import com.raullopezpenalva.newsletter_service.model.TokenType;
-import com.raullopezpenalva.newsletter_service.model.VerificationToken;
-import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.VerificationTokenRepository;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.TokenType;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.VerificationToken;
+
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;

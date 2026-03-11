@@ -1,10 +1,12 @@
-package com.raullopezpenalva.newsletter_service.service;
+package com.raullopezpenalva.newsletter_service.modules.newsletter.application.service;
 
-import com.raullopezpenalva.newsletter_service.model.Subscriber;
-import com.raullopezpenalva.newsletter_service.model.SubscriptionStatus;
-import com.raullopezpenalva.newsletter_service.model.TokenType;
-import com.raullopezpenalva.newsletter_service.repository.SubscriberRepository;
-import com.raullopezpenalva.newsletter_service.repository.VerificationTokenRepository;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.Subscriber;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.SubscriberRepository;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.VerificationTokenRepository;
+import com.raullopezpenalva.newsletter_service.modules.platform.notification.application.service.EmailService;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.service.TokenService;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.TokenType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class NewsletterService {
+public class NewsletterPublicService {
 
     @Autowired
     private final SubscriberRepository subscriberRepository;

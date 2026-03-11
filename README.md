@@ -87,34 +87,48 @@ Additionally, this repository contains service classes that encapsulate the busi
 
 ## Repository Structure
 
+See [Architecture Documentation](docs/architecture.md)
+
 ### Folders structure
 ```plaintext
 newsletter-service/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/raullopezpenalva/newsletter/
-│   │   │   ├── config/
-│   │   │   │   └── OpenApiConfig.java
-│   │   │   ├── controller/
-│   │   │   │   └── NewsletterController.java
-│   │   │   ├── model/
-│   │   │   │   ├── Subscriber.java
-│   │   │   │   ├── VerificationToken.java
-│   │   │   │   ├── SubscriptionStatus.java
-│   │   │   │   └── TokeType.java
-│   │   │   ├── repository/
-│   │   │   │   ├── SubscriberRepository.java
-│   │   │   │   └── VerificationTokenRepository.java
-│   │   │   ├── service/
-│   │   │   │   ├── NewsletterService.java
-│   │   │   │   ├── TokenService.java
-│   │   │   │   └── EmailService.java
-│   │   │   └── NewsletterServiceApplication.java
+│   │   ├── java/com/raullopezpenalva/newsletter_service/
+│   │   │   ├── modules/
+│   │   │   │   ├── newsletter/
+│   │   │   │   │   ├── api/
+│   │   │   │   │   │   ├── controller/
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   └── error/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── exception/
+│   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   └── events
+│   │   │   │   │   └── infrastructure/
+│   │   │   │   │       ├── config/
+│   │   │   │   │       ├── repository/
+│   │   │   │   │       └── security/
+│   │   │   │   └── platform/
+│   │   │   │       ├── notification/
+│   │   │   │       │    ├── api/
+│   │   │   │       │    ├── application/
+│   │   │   │       │    ├── domain/
+│   │   │   │       │    └── infrastructure/
+│   │   │   │       └── tokens/
+│   │   │   │               ├── api/
+│   │   │   │               ├── application/
+│   │   │   │               ├── domain/
+│   │   │   │               └── infrastructure/
+│   │   │   └── shared/
+│   │   │       └── events/
 │   │   └── resources/
 │   │       └── application.properties
-│   └── test/java/com/raullopezpenalva/newsletter_service/
-│       └── NewsletterServiceApplicationTests.java
-├── target/                # maven output .jar
+│   └── test/
 ├── docker-compose.yml
 ├── Dockerfile
 └── pom.xml

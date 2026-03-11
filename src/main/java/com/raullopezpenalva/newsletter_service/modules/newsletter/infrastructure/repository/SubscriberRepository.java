@@ -1,7 +1,4 @@
-package com.raullopezpenalva.newsletter_service.repository;
-
-import com.raullopezpenalva.newsletter_service.model.Subscriber;
-import com.raullopezpenalva.newsletter_service.model.SubscriptionStatus;
+package com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository;
 
 import jakarta.transaction.Transactional;
 
@@ -10,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.Subscriber;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
 
 import java.util.Optional;
 import java.util.UUID;

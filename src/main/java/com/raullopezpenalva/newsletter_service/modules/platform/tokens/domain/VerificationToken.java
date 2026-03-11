@@ -1,8 +1,9 @@
-package com.raullopezpenalva.newsletter_service.model;
+package com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
