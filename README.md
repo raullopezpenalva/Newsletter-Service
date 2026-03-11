@@ -55,6 +55,10 @@ Represents an individual who is in the process.
 | `createdAt`  | Timestamp| subscrition date                                                 |
 | `verifiedAt` | Timestamp| verification date                                                |
 | `userCreated`| Boolean  | True: comes from a user account -> Don't sent confirmation email |
+| `updatedAt`  | Timestamp| Last update date/time                                            |
+| `adminNote`  | String   | Internal note for management                                     |
+| `sourceIp`   | String   | Source IP of the request                                         |
+| `userAgent`  | String   | Client User-Agent                                                |
 
 A subcriber has three states:
 

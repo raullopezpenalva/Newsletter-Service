@@ -1,5 +1,6 @@
 package com.raullopezpenalva.newsletter_service.modules.newsletter.application.service;
 
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.Subscriber;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.SubscriberRepository;
@@ -31,16 +32,15 @@ public class NewsletterPublicService {
     // Service methods go here
 
     // Subscribe method
-    public record SubscribeResult (String finalStatus) {}
 
-    public SubscribeResult subscribe(Subscriber rawSubscriber) {
+    public SubscribeResponse subscribe(Subscriber rawSubscriber) {
         String norm = rawSubscriber.getEmail() == null ? "" : rawSubscriber.getEmail().trim().toLowerCase();
 
         var existed = subscriberRepository.findByEmail(norm);
         System.out.println("Result of findByEmail "+ existed);
         
         if (existed.isPresent() && existed.get().getStatus() == SubscriptionStatus.ACTIVE) {
-            return new SubscribeResult("already_subscribed");
+            return SubscribeFlowMapper.toResponse(existed.get(), com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.types.SubscribeResult.ALREADY_SUBSCRIBED);
 
         } else if (existed.isPresent() && existed.get().getStatus() == SubscriptionStatus.PENDING) {
             // Generate new token, invalidate old tokens and send verification email again
@@ -48,7 +48,7 @@ public class NewsletterPublicService {
             var token = tokenService.createToken(existed.get().getId(), TokenType.CONFIRMATION);
             emailService.sendVerificationEmail(existed.get().getEmail(), token);
             System.out.println("Resent verification email to: " + existed.get().getEmail());
-            return new SubscribeResult("confirmation_email_sent");
+            return SubscribeFlowMapper.toResponse(existed.get(), com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.types.SubscribeResult.CONFIRMATION_EMAIL_SENT);
 
         } else {
             var newSubscriber = new Subscriber();
