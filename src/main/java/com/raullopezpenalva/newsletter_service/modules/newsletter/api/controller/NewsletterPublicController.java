@@ -21,9 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.*;
-
-import java.lang.reflect.Parameter;
-import java.util.Map;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/newsletter")
@@ -134,10 +132,11 @@ public class NewsletterPublicController {
     )
     @PostMapping(
         value = "/confirm-unsubscription",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<UnsubscribeConfirmationResponse> confirmUnsubscription(@Valid @RequestBody UnsubscribeConfirmationRequest request) {
-        UnsubscribeConfirmationResponse response = newsletterService.confirmUnsubscription(request.getToken());
+        UnsubscribeConfirmationResponse response = newsletterService.confirmUnsubscription(request);
         
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

@@ -3,29 +3,29 @@ package com.raullopezpenalva.newsletter_service.modules.newsletter.application.s
 import com.raullopezpenalva.newsletter_service.shared.events.EventPublisher;
 
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.request.SubscribeRequest;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.request.UnsubscribeConfirmationRequest;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.request.UnsubscribeRequest;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.GenerateLinksResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeConfirmationResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeResponse;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.UnsubscribeConfirmationResponse;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.UnsubscribeResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.types.SubscribeResult;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.exception.ResourceNotFoundException;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.exception.TokenNotValidException;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.mapper.SubscribeFlowMapper;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.mapper.UnsubscribeFlowMapper;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.model.ClientContext;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.model.UnsubscribeLink;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.Subscriber;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.SubscriberRepository;
-import com.raullopezpenalva.newsletter_service.modules.platform.notification.application.service.EmailService;
 import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.service.TokenManagementService;
-import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.service.TokenService;
 import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.TokenType;
-import com.raullopezpenalva.newsletter_service.modules.platform.tokens.infrastructure.repository.VerificationTokenRepository;
-
 
 import java.util.List;
-import java.util.UUID;
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -110,39 +110,39 @@ public class NewsletterPublicService {
     }
 
     // Unsubscribe
-    public record UnsubscribeResult (boolean success, String message) {}
-
-    public UnsubscribeResult unsubscribe(String token) {
-        var result = tokenService.verifyToken(token);
-        if (result.success() == false) {
-            return new UnsubscribeResult(false, result.message());
+    public UnsubscribeResponse unsubscribe(UnsubscribeRequest request) {
+        var result = tokenManagementService.verifyToken(request.getToken());
+        if (result.getSuccess() == false) {
+            throw new TokenNotValidException(result.getMessage());
         }
-        return new UnsubscribeResult(true, "Token is valid, proceed to unsubscription confirmation");
+        tokenManagementService.invalidateTokens(result.getSubscriberId(), TokenType.UNSUBSCRIBE);
+        tokenManagementService.invalidateTokens(result.getSubscriberId(), TokenType.CONFIRMATION);
+        var token = tokenManagementService.createToken(result.getSubscriberId(), TokenType.CONFIRMATION);
+        var subscriber = subscriberRepository.findById(result.getSubscriberId());
+        return UnsubscribeFlowMapper.toUnsubscribeResponse(subscriber.get(), token.getToken());
     }
 
     // Confirmation of unsubscription
-    public record ConfirmUnsubscriptionResult (boolean success, String message) {}
 
-    public ConfirmUnsubscriptionResult confirmUnsubscription(String token) {
-        var result = tokenService.verifyToken(token);
-        if (result.success() == false) {
-            return new ConfirmUnsubscriptionResult(false, result.message());
+    public UnsubscribeConfirmationResponse confirmUnsubscription(UnsubscribeConfirmationRequest request) {
+        var result = tokenManagementService.verifyToken(request.getToken());
+        if (result.getSuccess() == false) {
+            throw new TokenNotValidException(result.getMessage());
         }
 
         // Mark token as used
-        UUID tokenID = result.tokenId();
-        verificationTokenRepository.markUsed(tokenID);
+        tokenManagementService.markTokenAsUsed(result.getTokenId());
 
         // Update subscriber status to UNSUBSCRIBED
-        var updateSubscriber = subscriberRepository.findById(result.subscriberId());
+        var updateSubscriber = subscriberRepository.findById(result.getSubscriberId());
         if (updateSubscriber.isEmpty()) {
-            return new ConfirmUnsubscriptionResult(false, "Subscriber not found");
+            throw new ResourceNotFoundException("Email not found");
         }
         var subscriber = updateSubscriber.get();
         subscriber.setStatus(SubscriptionStatus.UNSUBSCRIBED);
         subscriberRepository.save(subscriber);
 
-        return new ConfirmUnsubscriptionResult(true, "Successfully unsubscribed");
+        return UnsubscribeFlowMapper.toUnsubscribeConfirmationResponse(subscriber);
         
     }
 }
