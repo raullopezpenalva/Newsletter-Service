@@ -5,11 +5,13 @@ import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.S
 public class UpdateSubscriberStatusRequest {
     
     private SubscriptionStatus status;
+    private String adminNote;
 
     public UpdateSubscriberStatusRequest() {}
 
-    public UpdateSubscriberStatusRequest(SubscriptionStatus status) {
+    public UpdateSubscriberStatusRequest(SubscriptionStatus status, String adminNote) {
         this.status = status;
+        this.adminNote = adminNote;
     }
 
     public SubscriptionStatus getStatus() {
@@ -18,5 +20,13 @@ public class UpdateSubscriberStatusRequest {
 
     public void setStatus(SubscriptionStatus status) {
         this.status = status;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
     }
 }

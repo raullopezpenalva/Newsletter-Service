@@ -24,6 +24,7 @@ import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.response.GetAllByStatusResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.response.GetbyIdResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.response.UpdateSubscriberStatusResponse;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.service.NewsletterAdminService;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
 
 

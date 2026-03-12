@@ -10,14 +10,16 @@ public class UpdateSubscriberStatusResponse {
     private UUID id;
     private String email;
     private SubscriptionStatus status;
+    private String adminNote;
     private LocalDateTime updatedAt;
 
     public UpdateSubscriberStatusResponse() {}
 
-    public UpdateSubscriberStatusResponse(UUID id, String email, SubscriptionStatus status, LocalDateTime updatedAt) {
+    public UpdateSubscriberStatusResponse(UUID id, String email, SubscriptionStatus status, String adminNote, LocalDateTime updatedAt) {
         this.id = id;
         this.email = email;
         this.status = status;
+        this.adminNote = adminNote;
         this.updatedAt = updatedAt;
     }
 
@@ -51,5 +53,13 @@ public class UpdateSubscriberStatusResponse {
 
     public void setStatus(SubscriptionStatus status) {
         this.status = status;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
     }
 }

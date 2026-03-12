@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Repository
 public interface SubscriberRepository extends JpaRepository<Subscriber, UUID> {
     // Custom query methods (if needed) can be defined here
@@ -22,6 +25,9 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, UUID> {
     Optional<Subscriber> findByEmail(String email);
     Optional<Subscriber> findByEmailAndStatus(String email, SubscriptionStatus status);
     List<Subscriber> findByStatus(SubscriptionStatus status);
+
+    Page<Subscriber> findByStatus(SubscriptionStatus status, Pageable pageable);
+    Page<Subscriber> findAll(Pageable pageable);
 
     //@Modifying
     //@Transactional

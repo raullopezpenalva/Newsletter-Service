@@ -40,6 +40,7 @@ public class NewsletterAdminMapper {
             subscriber.getId(),
             subscriber.getEmail(),
             subscriber.getStatus(),
+            subscriber.getAdminNote(),
             subscriber.getUpdatedAt()
         );
     }
