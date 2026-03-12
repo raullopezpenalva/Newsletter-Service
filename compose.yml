@@ -8,8 +8,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - newsletter_network
   
   Email-Service:
     image: maildev/maildev
@@ -18,13 +16,9 @@ services:
       - "1080:1080"  # Web UI
     expose:
       - 1025      # SMTP
-    networks:
-      - newsletter_network
 
   testnewsletter-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     image: testnewsletter-service:latest
     container_name: testnewsletter_service
     env_file:
@@ -34,13 +28,7 @@ services:
     depends_on:
       - postgres
       - Email-Service
-    networks:
-      - newsletter_network
         
 
 volumes:
   postgres_data:
-
-networks:
-  newsletter_network:
-    driver: bridge  

@@ -1,0 +1,13 @@
+docs
+.vscode
+.mvn
+target
+!.mvn/wrapper/maven-wrapper.jar
+!.vscode
+!.idea
+plantUML
+dev-compose-starter.sh
+README.md
+LICENSE
+.gitignore
+HELP.md
