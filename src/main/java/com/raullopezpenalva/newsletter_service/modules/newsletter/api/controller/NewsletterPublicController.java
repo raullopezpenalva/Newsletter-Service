@@ -81,18 +81,18 @@ public class NewsletterPublicController {
     }
 
 
-    // UnsubscribeLink Generation endpoint
+    // UnsubscribeLinks Generation endpoint
     @Operation(
-        summary = "Generate unsubscribe link",
-        description = "Generate an unsubscribe link for all active email addresses. This link can be used to unsubscribe from the newsletter."
+        summary = "Generate unsubscribe links",
+        description = "Generate unsubscribe links for all active email addresses. These links can be used to unsubscribe from the newsletter."
     )
     @ApiResponses (value = {
-            @ApiResponse(responseCode = "200", description = "Unsubscribe link generated"),
+            @ApiResponse(responseCode = "200", description = "Unsubscribe links generated"),
             @ApiResponse(responseCode = "404", description = "Email not found")
         }
     )
     @GetMapping(
-        value = "/generate-unsubscribe-link",
+        value = "/generate-unsubscribe-links",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<GenerateLinksResponse> generateUnsubscribeLinks() {

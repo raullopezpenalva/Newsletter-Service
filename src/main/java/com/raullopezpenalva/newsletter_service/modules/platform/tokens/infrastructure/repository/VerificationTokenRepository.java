@@ -1,4 +1,4 @@
-package com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository;
+package com.raullopezpenalva.newsletter_service.modules.platform.tokens.infrastructure.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

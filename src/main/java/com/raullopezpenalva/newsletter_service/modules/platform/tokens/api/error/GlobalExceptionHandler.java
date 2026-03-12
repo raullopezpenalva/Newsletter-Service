@@ -1,4 +1,4 @@
-package com.raullopezpenalva.newsletter_service.modules.newsletter.api.error;
+package com.raullopezpenalva.newsletter_service.modules.platform.tokens.api.error;
 
 import java.time.Instant;
 import java.util.List;

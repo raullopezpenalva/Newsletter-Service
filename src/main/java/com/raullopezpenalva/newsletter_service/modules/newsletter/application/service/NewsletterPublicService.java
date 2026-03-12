@@ -1,120 +1,112 @@
 package com.raullopezpenalva.newsletter_service.modules.newsletter.application.service;
 
+import com.raullopezpenalva.newsletter_service.shared.events.EventPublisher;
+
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.request.SubscribeRequest;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.GenerateLinksResponse;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeConfirmationResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeResponse;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.types.SubscribeResult;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.exception.TokenNotValidException;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.mapper.SubscribeFlowMapper;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.model.ClientContext;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.application.model.UnsubscribeLink;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.Subscriber;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.SubscriberRepository;
-import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.VerificationTokenRepository;
 import com.raullopezpenalva.newsletter_service.modules.platform.notification.application.service.EmailService;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.service.TokenManagementService;
 import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.service.TokenService;
 import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.TokenType;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.infrastructure.repository.VerificationTokenRepository;
 
-import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class NewsletterPublicService {
 
-    @Autowired
+    @Value("${app.frontendBaseUrl}")
+    private String frontendBaseUrl;
+
     private final SubscriberRepository subscriberRepository;
-    private final VerificationTokenRepository verificationTokenRepository;
-    private final TokenService tokenService;
-    private final EmailService emailService;
+    private final EventPublisher eventPublisher;
+    private final TokenManagementService tokenManagementService;
 
-    // Constructor is no longer needed due to @RequiredArgsConstructor
-
-    // Service methods go here
+    public NewsletterPublicService(SubscriberRepository subscriberRepository, EventPublisher eventPublisher, TokenManagementService tokenManagementService) {
+        this.subscriberRepository = subscriberRepository;
+        this.eventPublisher = eventPublisher;
+        this.tokenManagementService = tokenManagementService;
+    }
 
     // Subscribe method
 
-    public SubscribeResponse subscribe(Subscriber rawSubscriber) {
-        String norm = rawSubscriber.getEmail() == null ? "" : rawSubscriber.getEmail().trim().toLowerCase();
-
-        var existed = subscriberRepository.findByEmail(norm);
-        System.out.println("Result of findByEmail "+ existed);
-        
-        if (existed.isPresent() && existed.get().getStatus() == SubscriptionStatus.ACTIVE) {
-            return SubscribeFlowMapper.toResponse(existed.get(), com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.types.SubscribeResult.ALREADY_SUBSCRIBED);
-
-        } else if (existed.isPresent() && existed.get().getStatus() == SubscriptionStatus.PENDING) {
-            // Generate new token, invalidate old tokens and send verification email again
-            tokenService.invalidateTokens(existed.get().getId(), TokenType.CONFIRMATION);
-            var token = tokenService.createToken(existed.get().getId(), TokenType.CONFIRMATION);
-            emailService.sendVerificationEmail(existed.get().getEmail(), token);
-            System.out.println("Resent verification email to: " + existed.get().getEmail());
-            return SubscribeFlowMapper.toResponse(existed.get(), com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.types.SubscribeResult.CONFIRMATION_EMAIL_SENT);
-
-        } else {
-            var newSubscriber = new Subscriber();
-            if (rawSubscriber.isUserCreated() == true) {
-                newSubscriber.setEmail(norm);
-                newSubscriber.setStatus (SubscriptionStatus.ACTIVE);
-                newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
-                newSubscriber.setCreatedAt(LocalDateTime.now());
-                newSubscriber.setVerifiedAt(LocalDateTime.now());
-                var saved = subscriberRepository.save(newSubscriber);
-                System.out.println("Saved subscriber: " + saved.getEmail() + " with ID: " + saved.getId());
-                return new SubscribeResult("subscribed");
+    public SubscribeResponse subscribe(SubscribeRequest request, ClientContext clientContext) {
+        String email = request.getEmail().toLowerCase().trim();
+        var existingSubscriber = subscriberRepository.findByEmail(email);
+        if (existingSubscriber.isPresent()) {
+            var subscriber = existingSubscriber.get();
+            if (subscriber.getStatus() != SubscriptionStatus.ACTIVE) {
+                tokenManagementService.invalidateTokens(subscriber.getId(), TokenType.CONFIRMATION);
+                var token = tokenManagementService.createToken(subscriber.getId(), TokenType.CONFIRMATION);
+                eventPublisher.publish(SubscribeFlowMapper.toConfirmationEmailEvent(subscriber, token.getToken()));
+                return SubscribeFlowMapper.toResponse(subscriber, SubscribeResult.CONFIRMATION_EMAIL_SENT);
             } else {
-                newSubscriber.setEmail(norm);
-                newSubscriber.setStatus(SubscriptionStatus.PENDING);
-                newSubscriber.setUserCreated(rawSubscriber.isUserCreated());
-                newSubscriber.setCreatedAt(LocalDateTime.now());
-                var saved = subscriberRepository.save(newSubscriber);
-                System.out.println("Saved subscriber: " + saved.getEmail() + " with ID: " + saved.getId());
-                // Generate verification token, save it and send verification email
-                var token = tokenService.createToken(saved.getId(), TokenType.CONFIRMATION);
-                emailService.sendVerificationEmail(saved.getEmail(), token);
-                return new SubscribeResult("confirmation_email_sent");
+                return SubscribeFlowMapper.toResponse(subscriber, SubscribeResult.ALREADY_SUBSCRIBED);
             }
+        } else {
+            var newSubscriber = SubscribeFlowMapper.toEntity(request, clientContext);
+            if (newSubscriber == null) {
+                throw new IllegalArgumentException("Failed to create subscriber from request");
+            }
+            subscriberRepository.save(newSubscriber);
+            var token = tokenManagementService.createToken(newSubscriber.getId(), TokenType.CONFIRMATION);
+            eventPublisher.publish(SubscribeFlowMapper.toConfirmationEmailEvent(newSubscriber, token.getToken()));
+            return SubscribeFlowMapper.toResponse(newSubscriber, SubscribeResult.CONFIRMATION_EMAIL_SENT);
         }
     }
 
     // Confirm subscription
-    public record ConfirmSubscription(boolean success, String message) {}
-
-    public ConfirmSubscription confirmSubscription(String token) {
-        var result = tokenService.verifyToken(token);
-        if (result.success() == false) {
-            return new ConfirmSubscription(false, result.message());
+    public SubscribeConfirmationResponse confirmSubscription(String token) {
+        var result = tokenManagementService.verifyToken(token);
+        if (result.getSuccess() == false) {
+            throw new TokenNotValidException(result.getMessage());
         }
 
         // Mark token as used
-        UUID tokenID = result.tokenId();
-        verificationTokenRepository.markUsed(tokenID);
+        tokenManagementService.markTokenAsUsed(result.getTokenId());
 
         // Update subscriber status to ACTIVE
-        var updateSubscriber = subscriberRepository.findById(result.subscriberId());
+        var updateSubscriber = subscriberRepository.findById(result.getSubscriberId());
         updateSubscriber.get().setVerifiedAt(LocalDateTime.now());
+        updateSubscriber.get().setStatus(SubscriptionStatus.ACTIVE);
+        subscriberRepository.save(updateSubscriber.get());
 
-        subscriberRepository.activateSubscriber(updateSubscriber.get().getId());
-
-        return new ConfirmSubscription(true, result.message() + "- Subscription verified");
+        return SubscribeFlowMapper.toConfirmationResponse(updateSubscriber.get(), SubscribeResult.SUBSCRIBED);
     }
 
-    // Get active subscribers
-    public Iterable<Subscriber> getActiveSubscribers() {
-        return subscriberRepository.findByStatus(SubscriptionStatus.ACTIVE);   
-    }
+
 
     // Generate unsubscribe link
-    public record GenerateUnsubscribeLinkResult (boolean success, String link) {}
 
-    public GenerateUnsubscribeLinkResult generateUnsubscribeLink(String email) {
-        var OpSubscriber = subscriberRepository.findByEmail(email);
-            if (OpSubscriber.isEmpty()) {
-                return new GenerateUnsubscribeLinkResult(false, "Email not found");
-            }
-            var subscriber = OpSubscriber.get();
-            var token = tokenService.createToken(subscriber.getId(), TokenType.UNSUBSCRIBE);
-            var link = emailService.generateUnsubscribeLink(token);
-            return new GenerateUnsubscribeLinkResult(true, link);
+    public GenerateLinksResponse generateUnsubscribeLinks() {
+        List<Subscriber> Subscribers = subscriberRepository.findByStatus(SubscriptionStatus.ACTIVE);
+        
+        List<UnsubscribeLink> links = Subscribers.stream()
+            .map(subscriber -> {
+                var token = tokenManagementService.createToken(subscriber.getId(), TokenType.UNSUBSCRIBE);
+                String unsubscribeUrl = frontendBaseUrl + "/unsubscribe?token=" + token.getToken();
+            return new UnsubscribeLink(subscriber.getEmail(), unsubscribeUrl);
+        }).toList();
+        
+        
+        return new GenerateLinksResponse(links);
     }
 
     // Unsubscribe

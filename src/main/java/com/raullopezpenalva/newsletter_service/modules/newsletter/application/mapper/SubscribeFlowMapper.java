@@ -1,10 +1,15 @@
 package com.raullopezpenalva.newsletter_service.modules.newsletter.application.mapper;
 
 
+import java.time.Instant;
+import java.util.UUID;
+
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.request.SubscribeRequest;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.model.ClientContext;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.Subscriber;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.events.SubscribeFlowConfirmationEmailEvent;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeConfirmationResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.types.SubscribeResult;
 
@@ -42,5 +47,34 @@ public class SubscribeFlowMapper {
         }
         
         return response;
+    }
+
+    public static SubscribeConfirmationResponse toConfirmationResponse(Subscriber subscriber, SubscribeResult status) {
+        SubscribeConfirmationResponse response = new SubscribeConfirmationResponse();
+        response.setId(subscriber.getId());
+        response.setEmail(subscriber.getEmail());
+        response.setVerifiedAt(subscriber.getVerifiedAt());
+        if (status == SubscribeResult.SUBSCRIBED) {
+            response.setStatus(SubscribeResult.SUBSCRIBED);
+            response.setMessage("Your subscription has been confirmed. You are now subscribed to the newsletter.");
+        } else {
+            response.setStatus(SubscribeResult.CONFIRMATION_FAILED);
+            response.setMessage("The confirmation link is invalid or has expired. Please try subscribing again.");
+        }
+        
+        return response;
+    }
+    public static SubscribeFlowConfirmationEmailEvent toConfirmationEmailEvent(Subscriber subscriber, String token) {
+
+        SubscribeFlowConfirmationEmailEvent event = new SubscribeFlowConfirmationEmailEvent(
+            UUID.randomUUID(),
+            Instant.now(),
+            SubscribeFlowConfirmationEmailEvent.TYPE,
+            subscriber.getEmail(),
+            token, 
+            null
+        );
+
+        return event;
     }
 }

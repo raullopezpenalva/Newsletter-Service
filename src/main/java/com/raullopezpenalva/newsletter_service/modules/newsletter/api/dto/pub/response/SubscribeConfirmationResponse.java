@@ -11,16 +11,16 @@ public class SubscribeConfirmationResponse {
     private String email;
     private SubscribeResult status;
     private String message;
-    private LocalDateTime updatedAt;
+    private LocalDateTime verifiedAt;
 
     public SubscribeConfirmationResponse() {}
 
-    public SubscribeConfirmationResponse(UUID id, String email, SubscribeResult status, String message, LocalDateTime updatedAt) {
+    public SubscribeConfirmationResponse(UUID id, String email, SubscribeResult status, String message, LocalDateTime verifiedAt) {
         this.id = id;
         this.email = email;
         this.status = status;
         this.message = message;
-        this.updatedAt = updatedAt;
+        this.verifiedAt = verifiedAt;
     }
 
     public UUID getId() {
@@ -39,8 +39,8 @@ public class SubscribeConfirmationResponse {
         return message;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public LocalDateTime getVerifiedAt() {
+        return verifiedAt;
     }
 
     public void setId(UUID id) {
@@ -59,8 +59,8 @@ public class SubscribeConfirmationResponse {
         this.message = message;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setVerifiedAt(LocalDateTime verifiedAt) {
+        this.verifiedAt = verifiedAt;
     }
 }
 

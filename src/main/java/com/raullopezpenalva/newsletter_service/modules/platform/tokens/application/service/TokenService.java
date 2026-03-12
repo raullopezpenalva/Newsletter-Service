@@ -1,27 +1,28 @@
 package com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.service;
 
-import com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository.VerificationTokenRepository;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.exception.ResourceNotFoundException;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.mapper.TokensMapper;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.application.model.VerificationResult;
 import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.TokenType;
 import com.raullopezpenalva.newsletter_service.modules.platform.tokens.domain.VerificationToken;
+import com.raullopezpenalva.newsletter_service.modules.platform.tokens.infrastructure.repository.VerificationTokenRepository;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
-public class TokenService {
+public class TokenService implements TokenManagementService {
 
-    @Autowired
     private final VerificationTokenRepository verificationTokenRepository;
-    // Constructor is no longer needed due to @RequiredArgsConstructor
-
-    // Service methods go here
+    
+    public TokenService(VerificationTokenRepository verificationTokenRepository) {
+        this.verificationTokenRepository = verificationTokenRepository;
+    }
 
     // Create token
     public VerificationToken createToken(UUID subscriberId, TokenType type) {
@@ -52,20 +53,26 @@ public class TokenService {
     }
 
     // Verify token
-    public record VerificationResult(boolean success, String message, UUID tokenId, UUID subscriberId) {}
-
     public VerificationResult verifyToken(String token) {
         var vtoken = verificationTokenRepository.findByToken(token);
         if (vtoken.isEmpty()) {
-            return new VerificationResult(false, "Invalid token", null, null);
+            return TokensMapper.toVerificationResult(false, "Invalid token", null, null);
         }
         var verificationToken = vtoken.get();
         if (verificationToken.isUsed()) {
-            return new VerificationResult(false, "Token already used", verificationToken.getId(), verificationToken.getSubscriberId());
+            return TokensMapper.toVerificationResult(false, "Token already used", verificationToken.getId(), verificationToken.getSubscriberId());
         }
         if (verificationToken.getExpiresAt() != null && verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            return new VerificationResult(false, "Token expired", verificationToken.getId(), verificationToken.getSubscriberId());
+            return TokensMapper.toVerificationResult(false, "Token expired", verificationToken.getId(), verificationToken.getSubscriberId());
         }
-        return new VerificationResult(true, "Token is valid", verificationToken.getId(), verificationToken.getSubscriberId());
+        return TokensMapper.toVerificationResult(true, "Token is valid", verificationToken.getId(), verificationToken.getSubscriberId());
+    }
+
+    // Mark token as used
+    @Transactional
+    public void markTokenAsUsed(UUID tokenId) {
+        var token = verificationTokenRepository.findById(tokenId)
+                .orElseThrow(() -> new ResourceNotFoundException("Token not found"));
+        token.setUsed(true);
     }
 }
