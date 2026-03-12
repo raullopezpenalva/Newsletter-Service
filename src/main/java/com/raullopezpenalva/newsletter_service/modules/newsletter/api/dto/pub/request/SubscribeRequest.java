@@ -2,6 +2,7 @@ package com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.r
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class SubscribeRequest {
@@ -11,7 +12,7 @@ public class SubscribeRequest {
     @Size(min = 5, max = 255)
     private String email;
 
-    @NotBlank
+    @NotNull
     private Boolean userCreated;
 
     public SubscribeRequest() {

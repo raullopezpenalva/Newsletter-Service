@@ -12,7 +12,7 @@ docker compose up -d
 
 # logs docker compose logs -f
 echo "Entering to Docker Compose logs..."
-docker compose logs -f testnewsletter_service
+docker logs -f testnewsletter_service
 
 # To stop the containers, you can use:
 echo "Stopping Docker containers..."

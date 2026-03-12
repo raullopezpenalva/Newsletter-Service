@@ -65,6 +65,12 @@ public class NewsletterPublicService {
             if (newSubscriber == null) {
                 throw new IllegalArgumentException("Failed to create subscriber from request");
             }
+            if (newSubscriber.isUserCreated() == true) {
+                newSubscriber.setStatus(SubscriptionStatus.ACTIVE);
+                newSubscriber.setVerifiedAt(LocalDateTime.now());
+                subscriberRepository.save(newSubscriber);
+                return SubscribeFlowMapper.toResponse(newSubscriber, SubscribeResult.SUBSCRIBED);
+            }
             subscriberRepository.save(newSubscriber);
             var token = tokenManagementService.createToken(newSubscriber.getId(), TokenType.CONFIRMATION);
             eventPublisher.publish(SubscribeFlowMapper.toConfirmationEmailEvent(newSubscriber, token.getToken()));

@@ -1,4 +1,4 @@
-package com.raullopezpenalva.contact_service.shared.events;
+package com.raullopezpenalva.newsletter_service.shared.events;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

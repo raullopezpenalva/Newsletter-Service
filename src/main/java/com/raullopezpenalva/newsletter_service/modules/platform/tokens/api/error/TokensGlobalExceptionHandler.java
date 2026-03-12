@@ -1,4 +1,4 @@
-package com.raullopezpenalva.newsletter_service.modules.newsletter.api.error;
+package com.raullopezpenalva.newsletter_service.modules.platform.tokens.api.error;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,7 +17,7 @@ import com.raullopezpenalva.newsletter_service.modules.newsletter.application.ex
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class TokensGlobalExceptionHandler {
 
     // Handles validation errors for @Valid annotated request bodies
     @ExceptionHandler(MethodArgumentNotValidException.class)

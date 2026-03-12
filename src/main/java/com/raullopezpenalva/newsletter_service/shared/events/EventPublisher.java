@@ -1,4 +1,4 @@
-package com.raullopezpenalva.contact_service.shared.events;
+package com.raullopezpenalva.newsletter_service.shared.events;
 
 public interface EventPublisher {
     void publish(DomainEvent event);

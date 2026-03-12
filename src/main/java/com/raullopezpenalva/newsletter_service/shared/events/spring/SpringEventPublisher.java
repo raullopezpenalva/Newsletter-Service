@@ -1,7 +1,7 @@
-package com.raullopezpenalva.contact_service.shared.events.spring;
+package com.raullopezpenalva.newsletter_service.shared.events.spring;
 
-import com.raullopezpenalva.contact_service.shared.events.DomainEvent;
-import com.raullopezpenalva.contact_service.shared.events.EventPublisher;
+import com.raullopezpenalva.newsletter_service.shared.events.DomainEvent;
+import com.raullopezpenalva.newsletter_service.shared.events.EventPublisher;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
