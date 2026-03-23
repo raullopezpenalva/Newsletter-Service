@@ -8,6 +8,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dev-network
   
   Email-Service:
     image: maildev/maildev
@@ -16,6 +18,8 @@ services:
       - "1080:1080"  # Web UI
     expose:
       - 1025      # SMTP
+    networks:
+      - dev-network
 
   testnewsletter-service:
     build: .
@@ -24,11 +28,24 @@ services:
     env_file:
       - .env
     ports:
-      - "8082:8080"
+      - "8080:8080"
     depends_on:
       - postgres
       - Email-Service
-        
+    networks:
+      - dev-network
+  
+  frontend:
+    image: ghcr.io/raullopezpenalva/newsletter-frontend:latest
+    container_name: newsletter_frontend
+    ports:
+      - "80:80"
+    networks:
+      - dev-network
 
 volumes:
   postgres_data:
+
+networks:
+  dev-network:
+    external: true

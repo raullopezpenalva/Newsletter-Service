@@ -289,3 +289,48 @@ This architecture aims to achieve:
 - **event-driven extensibility**
 
 The result is a backend system that can grow over time while remaining maintainable and modular.
+
+
+```plaintext
+newsletter-service/
+├── src/
+│   ├── main/
+│   │   ├── java/com/raullopezpenalva/newsletter_service/
+│   │   │   ├── modules/
+│   │   │   │   ├── newsletter/
+│   │   │   │   │   ├── api/
+│   │   │   │   │   │   ├── controller/
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   └── error/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── exception/
+│   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   └── events
+│   │   │   │   │   └── infrastructure/
+│   │   │   │   │       ├── config/
+│   │   │   │   │       ├── repository/
+│   │   │   │   │       └── security/
+│   │   │   │   └── platform/
+│   │   │   │       ├── notification/
+│   │   │   │       │    ├── api/
+│   │   │   │       │    ├── application/
+│   │   │   │       │    ├── domain/
+│   │   │   │       │    └── infrastructure/
+│   │   │   │       └── tokens/
+│   │   │   │               ├── api/
+│   │   │   │               ├── application/
+│   │   │   │               ├── domain/
+│   │   │   │               └── infrastructure/
+│   │   │   └── shared/
+│   │   │       └── events/
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+├── docker-compose.yml
+├── Dockerfile
+└── pom.xml
+```

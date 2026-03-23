@@ -11,18 +11,23 @@ import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.re
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.SubscribeResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.UnsubscribeConfirmationResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.pub.response.UnsubscribeResponse;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.error.ApiError;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.model.ClientContext;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.service.NewsletterPublicService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.*;
-import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Newsletter Public API", description = "Endpoints for public newsletter operations such as subscribing, confirming subscription, generating unsubscribe links, and unsubscribing.")
 @RestController
 @RequestMapping("/api/v1/newsletter")
 public class NewsletterPublicController {
@@ -34,12 +39,40 @@ public class NewsletterPublicController {
     // Subscribe endpoint
     @Operation(
         summary = "Subscribe to the newsletter",
-        description = "Subscribe to the newsletter with your email address. If the email is already subscribed, a conflict status will be returned. If double opt-in is enabled and the request does not originate from user creation, a confirmation email will be sent."
+        description = "Subscribe to the newsletter with your email address. If the email is already subscribed, a conflict status will be returned. If double opt-in is enabled and the request does not originate from user creation, a confirmation email will be sent.",
+        requestBody = @RequestBody(
+            description = "Subscription request containing the email address to subscribe and if the request comes from a user system.",
+            required = true,
+            content = @Content(
+                schema = @Schema(implementation = SubscribeRequest.class)
+            )
+        )
     )
     @ApiResponses (value = {
-            @ApiResponse(responseCode = "201", description = "Successfully subscribed"),
-            @ApiResponse(responseCode = "200", description = "Confirmation email sent"),
-            @ApiResponse(responseCode = "409", description = "Email already subscribed")
+            @ApiResponse(
+                responseCode = "200",
+                description = "Subscription successful. If the request does not originate from user creation, a confirmation email will be sent.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = SubscribeResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Invalid request. The email address is missing or not in a valid format.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal server error. An unexpected error occurred while processing the subscription request.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            )
         }
     )
     @PostMapping(
@@ -64,8 +97,30 @@ public class NewsletterPublicController {
         description = "Confirm your newsletter subscription using the token sent to your email. If the token is valid, your subscription will be activated."
     )
     @ApiResponses (value = {
-            @ApiResponse(responseCode = "200", description = "Subscription confirmed"),
-            @ApiResponse(responseCode = "400", description = "Invalid or expired token")
+            @ApiResponse(
+                responseCode = "200",
+                description = "Subscription confirmed",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = SubscribeConfirmationResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Invalid request. The token is missing, invalid, or has already been used.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal server error. An unexpected error occurred while processing the subscription request.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            )
         }
     )
     @PostMapping(
@@ -85,8 +140,30 @@ public class NewsletterPublicController {
         description = "Generate unsubscribe links for all active email addresses. These links can be used to unsubscribe from the newsletter."
     )
     @ApiResponses (value = {
-            @ApiResponse(responseCode = "200", description = "Unsubscribe links generated"),
-            @ApiResponse(responseCode = "404", description = "Email not found")
+            @ApiResponse(
+                responseCode = "200",
+                description = "Unsubscribe links generated",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = GenerateLinksResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Email not found",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal server error. An unexpected error occurred while generating the unsubscribe links.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+             )
         }
     )
     @GetMapping(
@@ -102,15 +179,45 @@ public class NewsletterPublicController {
     // Unsubscribe endpoint
     @Operation(
         summary = "Unsubscribe from the newsletter",
-        description = "Unsubscribe from the newsletter using the token sent to your email. If the token is valid redirection to the frontend to confirm unsubscription."
+        description = "Unsubscribe from the newsletter using the token sent to your email. If the token is valid redirection to the frontend to confirm unsubscription.",
+            requestBody = @RequestBody(
+                description = "Unsubscription request containing the token sent to the user's email.",
+                required = true,
+                content = @Content(
+                    schema = @Schema(implementation = UnsubscribeRequest.class)
+                )
+            )
     )
     @ApiResponses (value = {
-            @ApiResponse(responseCode = "200", description = "Unsubscription frontend confirmation sent"),
-            @ApiResponse(responseCode = "400", description = "Invalid or expired token")
+            @ApiResponse(
+                responseCode = "200",
+                description = "Token valid.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UnsubscribeResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Invalid or expired token",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+             ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal server error. An unexpected error occurred while unsubscribing.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+             )
         }
     )
-    @GetMapping(
+    @PostMapping(
         value = "/unsubscribe",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<UnsubscribeResponse> unsubscribe(@Valid @RequestBody UnsubscribeRequest request) {
@@ -123,11 +230,40 @@ public class NewsletterPublicController {
     // Confirm Unsubscription endpoint
     @Operation(
         summary = "Confirm unsubscription from the newsletter",
-        description = "Confirm your unsubscription from the newsletter using the the frontend confirmation. If successful, your subscription will be marked as unsubscribed."
+        description = "Confirm your unsubscription from the newsletter using the the frontend confirmation. If successful, your subscription will be marked as unsubscribed.",
+            requestBody = @RequestBody(
+                description = "Unsubscription confirmation request containing the token sent to the user's email.",
+                required = true,
+                content = @Content(
+                    schema = @Schema(implementation = UnsubscribeConfirmationRequest.class)
+                )
+            )
     )
     @ApiResponses (value = {
-            @ApiResponse(responseCode = "200", description = "Unsubscription successful"),
-            @ApiResponse(responseCode = "404", description = "Email not found")
+            @ApiResponse(
+                responseCode = "200",
+                description = "Unsubscription successful",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UnsubscribeConfirmationResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Email not found",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal server error. An unexpected error occurred while confirming unsubscription.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+             )
         }
     )
     @PostMapping(

@@ -1,0 +1,57 @@
+@startuml subscribe_confirmation_sequence_diagram
+actor User
+
+participant "Newsletter-FrontEnd" as Frontend
+participant "NewsletterController" as Controller
+participant "NewsletterService" as Service
+participant "TokenService" as TokenService
+participant "SubscriberRepository" as Repo
+participant "VerificationTokenRepository" as TokenRepo
+
+User -> Frontend : Click confirmation link in email
+activate Frontend
+Frontend -> Controller : POST /confirm-subscription?token=abc123
+deactivate Frontend
+activate Controller
+Controller -> Service : confirmSubscription(token)
+activate Service
+Service -> TokenService : findByToken(token)
+activate TokenService
+TokenService -> TokenRepo : findByToken(token)
+activate TokenRepo
+TokenRepo --> TokenService : return token details
+deactivate TokenRepo
+TokenService --> Service : return token details
+deactivate TokenService
+
+alt Token invalid or already used
+    Service --> Controller : "Invalid or expired token"
+    Controller --> Frontend : "Invalid or expired token"
+    activate Frontend
+    Frontend --> User : "Invalid or expired token"
+    deactivate Frontend
+else Valid token
+    Service -> Repo : findBySubscriberId(token.subscriberId)
+    activate Repo
+    Repo --> Service : return subscriber details
+    deactivate Repo
+    Service -> Repo : update subscriber status to ACTIVE
+    activate Repo
+    Repo --> Service : return updated subscriber
+    deactivate Repo
+    Service -> TokenService : markTokenAsUsed(token)
+    activate TokenService
+    TokenService -> TokenRepo : mark token as used
+    activate TokenRepo
+    TokenRepo --> TokenService : return updated token
+    deactivate TokenRepo
+    TokenService --> Service : return
+    deactivate TokenService
+    Service --> Controller : "Subscription confirmed"
+    deactivate Service
+    Controller --> Frontend : "Subscription confirmed"
+    deactivate Controller
+    activate Frontend
+    Frontend --> User : "Subscription confirmed"
+    deactivate Frontend
+end

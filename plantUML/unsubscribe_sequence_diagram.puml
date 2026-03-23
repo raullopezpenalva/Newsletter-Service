@@ -1,16 +1,16 @@
 @startuml unsubscribe_sequence_diagram
 actor Usuario
 
+participant "NewsletterFrontend" as Frontend
 participant "NewsletterController" as Controller
 participant "NewsletterService" as Service
-participant "Unsubscribe landing page" as FrontendService
 participant "TokenService" as TokenService
 participant "SubscriberRepository" as Repo
 participant "VerificationTokenRepository" as TokenRepo
 
-Usuario -> Controller : GET with personal token unsubscribe link
+Usuario -> Frontend : Use unsubscribe link
 activate Usuario
-
+Frontend -> Controller : GET /api/v1/newsletter/unsubscribe with token
 activate Controller
 Controller -> Service : Validates the token
 activate Service
@@ -25,20 +25,23 @@ deactivate TokenService
 Service -> Controller : return status ok or forbidden
 deactivate Service
 alt Token is correct
-  Controller -> FrontendService : re-directs to unsubscribe landing page
-  activate FrontendService
-  FrontendService -> Usuario : returns landing page with unsubscribe button and poll
-  deactivate FrontendService
+  Controller -> Frontend : Response with 200 and email and new token
+  activate Frontend
+  Frontend -> Usuario : returns landing page with unsubscribe button
+  deactivate Frontend
 else Token not correct
-  Controller -> FrontendService : re-directs to error page
-  activate FrontendService
-  FrontendService -> Usuario : returns "Error" page
-  deactivate FrontendService
+  Controller -> Frontend : Response with forbidden
+  activate Frontend
+  Frontend -> Usuario : returns "Error" page
+  deactivate Frontend
 end
 deactivate Controller
 
-Usuario -> Controller : User fill in the poll and clic the unsubscribe button
+Usuario -> Frontend : User clicks the unsubscribe button
 deactivate Usuario
+activate Frontend
+Frontend -> Controller : POST /api/v1/newsletter/confirm-unsubscription with token
+deactivate Frontend
 activate Controller 
 Controller -> Service : Checks if the token is valid
 activate Service
@@ -65,16 +68,16 @@ alt Token is correct
   TokenService --> Service : return
   deactivate TokenService
   Service -> Controller : return status ok
-  Controller -> FrontendService : return status ok
-  activate FrontendService
-  FrontendService -> Usuario : return UNSUBSCRIBED message
-  deactivate FrontendService
+  Controller -> Frontend : return status ok
+  activate Frontend
+  Frontend -> Usuario : return UNSUBSCRIBED message
+  deactivate Frontend
 else Token not correct
   Service -> Controller : return forbidden
-  Controller -> FrontendService : return forbidden
-  activate FrontendService
-  FrontendService -> Usuario : return "Error"
-  deactivate FrontendService
+  Controller -> Frontend : return forbidden
+  activate Frontend
+  Frontend -> Usuario : return "Error"
+  deactivate Frontend
 end
 
 deactivate Service

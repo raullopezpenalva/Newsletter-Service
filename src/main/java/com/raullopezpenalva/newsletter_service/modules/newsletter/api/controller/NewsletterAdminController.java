@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 import org.springframework.http.*;
@@ -24,6 +23,7 @@ import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.response.GetAllByStatusResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.response.GetbyIdResponse;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.api.dto.admin.response.UpdateSubscriberStatusResponse;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.api.error.ApiError;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.application.service.NewsletterAdminService;
 import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
 
@@ -36,6 +36,37 @@ public class NewsletterAdminController {
     @Autowired
     private NewsletterAdminService newsletterAdminService;
 
+    @Operation(
+        summary = "List subscribers",
+        description = "Retrieve a paginated list of subscribers. You can filter by subscription status."
+    )
+    @ApiResponses (value = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Subscribers retrieved successfully",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = GetAllByStatusResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Invalid request. The provided parameters are not valid.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal server error. An unexpected error occurred while processing the request.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            )
+        }
+    )
     @GetMapping(
         value = "/subscribers",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -47,6 +78,37 @@ public class NewsletterAdminController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(
+        summary = "Get subscriber by ID",
+        description = "Retrieve a subscriber's details by their unique ID."
+    )
+    @ApiResponses (value = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Subscriber retrieved successfully",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = GetbyIdResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Subscriber not found",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal server error. An unexpected error occurred while processing the request.",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiError.class)
+                )
+            )
+        }   
+    )
     @GetMapping(
         value = "/subscribers/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -57,6 +119,9 @@ public class NewsletterAdminController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+
+
 
     @PatchMapping(
         value = "/subscribers/{id}/status",
