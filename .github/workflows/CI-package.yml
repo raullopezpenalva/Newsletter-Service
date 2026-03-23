@@ -1,9 +1,8 @@
 name: CI - Build and Push to GHCR
 
 on:
-  push:
-    branches: [main]
-    tags: ['v*']
+  release:
+    types: [released]
   
 permissions:
   contents: read
