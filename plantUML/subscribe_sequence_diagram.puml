@@ -1,6 +1,7 @@
 @startuml subscribe_sequence_diagram
 actor User
 
+participant "Newsletter-FrontEnd" as Frontend
 participant "NewsletterController" as Controller
 participant "NewsletterService" as Service
 participant "TokenService" as TokenService
@@ -8,7 +9,10 @@ participant "EmailService" as EmailService
 participant "SubscriberRepository" as Repo
 participant "VerificationTokenRepository" as TokenRepo
 
-User -> Controller : POST /subscribe (email, userCreated)
+User -> Frontend : Summit subscription form (email, userCreated)
+activate Frontend
+Frontend -> Controller : POST /subscribe (email, userCreated)
+deactivate Frontend
 
 activate Controller
 Controller -> Service : subscribe(email, userCreated)
@@ -21,7 +25,10 @@ deactivate Repo
 
 alt Email already subscribed and active
     Service --> Controller : "Already subscribed"
-    Controller --> User : "Already subscribed"
+    Controller --> Frontend : "Already subscribed"
+    activate Frontend
+    Frontend --> User : "Already subscribed"
+    deactivate Frontend
 else Email subscribed but PENDING
     Service -> TokenService : invalidateOldTokens(email)
     activate TokenService
@@ -41,12 +48,18 @@ else Email subscribed but PENDING
     deactivate TokenService
     Service -> EmailService : sendConfirmationEmail(email, token)
     Service --> Controller : "Confirmation email resent"
-    Controller --> User : "Subscription pending confirmation"
+    Controller --> Frontend : "Subscription pending confirmation"
+    activate Frontend
+    Frontend --> User : "Subscription pending confirmation"
+    deactivate Frontend
 else New email
     alt Email associated to already created user
     Service -> Repo : save(new Subscriber(status = ACTIVE))
     Service --> Controller : "Active subscription"
-    Controller --> User : "Active subscription"
+    Controller --> Frontend : "Active subscription"
+    activate Frontend
+    Frontend --> User : "Active subscription"
+    deactivate Frontend
 
     else Email not associated to a user
     Service -> Repo : save(new Subscriber(status = PENDING))
@@ -60,7 +73,10 @@ else New email
     deactivate TokenService
     Service -> EmailService : sendConfirmationEmail(email, token)
     Service --> Controller : "Subscription pending confirmation"
-    Controller --> User : "Subscription pending confirmation"
+    Controller --> Frontend : "Subscription pending confirmation"
+    activate Frontend
+    Frontend --> User : "Subscription pending confirmation"
+    deactivate Frontend
     end
 end
 

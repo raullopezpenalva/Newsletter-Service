@@ -1,0 +1,37 @@
+package com.raullopezpenalva.newsletter_service.modules.newsletter.infrastructure.repository;
+
+// import jakarta.transaction.Transactional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+//import org.springframework.data.jpa.repository.Query;
+//import org.springframework.data.repository.query.Param;
+//import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.stereotype.Repository;
+
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.Subscriber;
+import com.raullopezpenalva.newsletter_service.modules.newsletter.domain.model.SubscriptionStatus;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+@Repository
+public interface SubscriberRepository extends JpaRepository<Subscriber, UUID> {
+    // Custom query methods (if needed) can be defined here
+    Optional<Subscriber> findById(UUID id);
+    Optional<Subscriber> findByEmail(String email);
+    Optional<Subscriber> findByEmailAndStatus(String email, SubscriptionStatus status);
+    List<Subscriber> findByStatus(SubscriptionStatus status);
+
+    Page<Subscriber> findByStatus(SubscriptionStatus status, Pageable pageable);
+    Page<Subscriber> findAll(Pageable pageable);
+
+    //@Modifying
+    //@Transactional
+    //@Query ("update Subscriber s set s.status = ACTIVE where s.id = :id")
+    //int activateSubscriber(@Param("id") UUID id);
+    //Iterable<Subscriber> findByStatus(SubscriptionStatus active);
+}

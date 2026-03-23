@@ -11,7 +11,7 @@ package "Newsletter Service" {
     usecase "Subscribe to newsletter" as UC_Subscribe
     usecase "Confirm subscription" as UC_Verify
     usecase "View unsubscribe form" as UC_UnsubPage
-    usecase "Confirm unsubscribe with reason" as UC_UnsubConfirm
+    usecase "Confirm unsubscribe" as UC_UnsubConfirm
     usecase "Get personalized unsubscribe link" as UC_GenUnsubLink
     usecase "View subscriber list" as UC_ListSubscribers
     usecase "View subscriber metrics" as UC_Stats

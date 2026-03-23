@@ -9,7 +9,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - newsletter_network
+      - dev-network
   
   Email-Service:
     image: maildev/maildev
@@ -19,28 +19,33 @@ services:
     expose:
       - 1025      # SMTP
     networks:
-      - newsletter_network
+      - dev-network
 
   testnewsletter-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     image: testnewsletter-service:latest
     container_name: testnewsletter_service
     env_file:
       - .env
     ports:
-      - "8082:8080"
+      - "8080:8080"
     depends_on:
       - postgres
       - Email-Service
     networks:
-      - newsletter_network
-        
+      - dev-network
+  
+  frontend:
+    image: ghcr.io/raullopezpenalva/newsletter-frontend:latest
+    container_name: newsletter_frontend
+    ports:
+      - "80:80"
+    networks:
+      - dev-network
 
 volumes:
   postgres_data:
 
 networks:
-  newsletter_network:
-    driver: bridge  
+  dev-network:
+    external: true
