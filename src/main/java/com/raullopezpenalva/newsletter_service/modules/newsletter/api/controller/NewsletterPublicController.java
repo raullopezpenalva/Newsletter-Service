@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+// import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -40,7 +40,7 @@ public class NewsletterPublicController {
     @Operation(
         summary = "Subscribe to the newsletter",
         description = "Subscribe to the newsletter with your email address. If the email is already subscribed, a conflict status will be returned. If double opt-in is enabled and the request does not originate from user creation, a confirmation email will be sent.",
-        requestBody = @RequestBody(
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Subscription request containing the email address to subscribe and if the request comes from a user system.",
             required = true,
             content = @Content(
@@ -80,7 +80,7 @@ public class NewsletterPublicController {
          consumes = MediaType.APPLICATION_JSON_VALUE,
          produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<SubscribeResponse> subscribe(@Valid @RequestBody  SubscribeRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<SubscribeResponse> subscribe(@Valid @RequestBody SubscribeRequest request, HttpServletRequest httpRequest) {
 
         ClientContext clientContext = new ClientContext(
             httpRequest.getHeader("X-Forwarded-For") != null ? httpRequest.getHeader("X-Forwarded-For") : httpRequest.getRemoteAddr(),
@@ -180,7 +180,7 @@ public class NewsletterPublicController {
     @Operation(
         summary = "Unsubscribe from the newsletter",
         description = "Unsubscribe from the newsletter using the token sent to your email. If the token is valid redirection to the frontend to confirm unsubscription.",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Unsubscription request containing the token sent to the user's email.",
                 required = true,
                 content = @Content(
@@ -231,7 +231,7 @@ public class NewsletterPublicController {
     @Operation(
         summary = "Confirm unsubscription from the newsletter",
         description = "Confirm your unsubscription from the newsletter using the the frontend confirmation. If successful, your subscription will be marked as unsubscribed.",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Unsubscription confirmation request containing the token sent to the user's email.",
                 required = true,
                 content = @Content(
